@@ -1,0 +1,45 @@
+name: neurohunter
+
+networks:
+  neurohunter:
+    driver: bridge
+
+services:
+  mongo:
+    image: mongo:8
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+
+    ports:
+      - "${MONGO_PORT}:27017"
+
+    networks:
+      - neurohunter
+
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express:1.0.2
+
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin"
+      ME_CONFIG_BASICAUTH_ENABLED: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+
+    ports:
+      - "8081:8081"
+
+    networks:
+      - neurohunter
+
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
+    driver: local

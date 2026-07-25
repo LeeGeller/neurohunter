@@ -4,10 +4,10 @@ type Vacancy struct {
 	ID          int
 	Title       string
 	Company     string
-	Location    string
+	WorkFormat  string
 	Description string
 	URL         string
-	SalaryFrom  int
-	SalaryTo    int
-	City        string
+	WorkType    string
+	SalaryInfo  string
+	Skills      string
 }

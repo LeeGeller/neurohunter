@@ -8,6 +8,7 @@ import (
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
+
 	if query == "" {
 		http.Error(w, "Query parameter is required", http.StatusBadRequest)
 		return
