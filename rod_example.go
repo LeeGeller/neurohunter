@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"neurohunter/internal/habr/salary"
+	"strings"
 
 	"github.com/go-rod/rod"
 )
@@ -48,7 +50,7 @@ func main() {
 
 		fmt.Println("Страница вакансии открыта")
 		fmt.Println("Title:", vacancyPage.MustElement(".page-title__title").MustText())
-		fmt.Println("Company", vacancyPage.MustElement("a[href*='/companies/']").MustText())
+		fmt.Println("Company", vacancyPage.MustElement(".company_name").MustText())
 		conditionsTitle, err := vacancyPage.ElementR(
 			"h2.content-section__title",
 			"Условия",
@@ -61,21 +63,69 @@ func main() {
 
 		conditionsSection := conditionsTitle.MustParent().MustParent()
 
-		workFormat, err := conditionsSection.Element(".chip-with-icon__text")
+		vacancyMeta, err := conditionsSection.Element(".vacancy-meta")
 
 		if err != nil {
-			fmt.Println("Не найден формат работы:", err)
+			fmt.Println("Не найден vacancy-meta:", err)
 			continue
 		}
 
-		fmt.Println("WorkFormat:", workFormat.MustText())
+		placeChips := vacancyMeta.MustElements(
+			`.basic-chip:has(.svg-icon--icon-placemark)`,
+		)
+		var cities []string
 
-		//fmt.Println("WorkFormat:", vacancyPage.
-		//	MustElement(`use[xlink\:href*="#format"]`).
-		//	MustParent().
-		//	MustParent().
-		//	MustElement(".chip-with-icon__text").
-		//	MustText())
+		if placeChips == nil {
+			fmt.Println("Город не указан")
+		} else {
+			for _, placeChip := range placeChips {
+				workPlace := placeChip.MustElement(".chip-with-icon__text").MustText()
+
+				cities = append(cities, strings.TrimSpace(workPlace))
+			}
+		}
+		fmt.Println("Города:", cities)
+
+		workFormatChip, err := vacancyMeta.Element(
+			`.basic-chip:has(.svg-icon--icon-format)`,
+		)
+
+		if err != nil {
+			fmt.Println("Формат работы не указан")
+			continue
+		} else {
+			workFormat := workFormatChip.MustElement(
+				".chip-with-icon__text",
+			).MustText()
+
+			fmt.Println("Формат работы:", workFormat)
+		}
+
+		description := vacancyPage.MustElement(".vacancy-description__text").MustText()
+
+		fmt.Println("Описание:", description)
+
+		salarySection, err := vacancyPage.Element(".vacancy-header__salary")
+
+		if err != nil {
+			fmt.Println("Зарплата не указана")
+			continue
+		}
+
+		salaryElement, err := salarySection.Element(".basic-salary")
+
+		if err != nil {
+			fmt.Println("Зарплата не указана")
+			continue
+		}
+
+		salaryInfo := salaryElement.MustText()
+
+		salaryFrom, salaryTo := salary.Parse(salaryInfo)
+
+		fmt.Println("Зарплата от:", salaryFrom)
+		fmt.Println("Зарплата до:", salaryTo)
+		fmt.Println("Валюта", salary.ParseCurrency(salaryInfo))
 
 	}
 }
