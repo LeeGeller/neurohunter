@@ -1,15 +1,16 @@
 package model
 
+import "time"
+
 type Vacancy struct {
-	ID           int
 	Title        string
 	Company      string
-	WorkLocation string
-	WorkFormat   string
+	WorkLocation *string
+	WorkFormat   *string
 	URL          string
 	Description  string
-	SalaryFrom   int
-	SalaryTo     int
-	Currency     string
-	Skills       string
+	SalaryFrom   *int
+	SalaryTo     *int
+	Currency     *string
+	VacancyDate  time.Time
 }

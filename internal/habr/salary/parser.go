@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-func Parse(text string) (from int, to int) {
+func Parse(text string) (from *int, to *int) {
 
 	re := regexp.MustCompile(`(\d[\d\s]*)`)
 	matches := re.FindAllString(text, -1)
 
 	if len(matches) == 0 {
-		return 0, 0
+		return nil, nil
 	}
 
 	from = ParseNumberFromString(matches[0])
@@ -24,16 +24,16 @@ func Parse(text string) (from int, to int) {
 	return from, to
 }
 
-func ParseNumberFromString(s string) int {
+func ParseNumberFromString(s string) *int {
 	value := strings.ReplaceAll(s, " ", "")
 
 	number, err := strconv.Atoi(value)
 
 	if err != nil {
-		return 0
+		return nil
 	}
 
-	return number
+	return &number
 }
 
 func ParseCurrency(text string) string {
