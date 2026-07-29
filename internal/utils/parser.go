@@ -1,4 +1,4 @@
-package salary
+package utils
 
 import (
 	"regexp"
@@ -7,7 +7,6 @@ import (
 )
 
 func Parse(text string) (from *int, to *int) {
-
 	re := regexp.MustCompile(`(\d[\d\s]*)`)
 	matches := re.FindAllString(text, -1)
 
@@ -48,4 +47,11 @@ func ParseCurrency(text string) string {
 	symbol := reSymbol.FindString(text)
 
 	return symbol
+}
+
+func ParseVacancyID(href string) string {
+	// Recieve href like https://career.habr.com/vacancy/123
+	// Return 123
+	parts := strings.Split(strings.TrimRight(href, "/"), "/")
+	return parts[len(parts)-1]
 }

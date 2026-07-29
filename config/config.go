@@ -17,6 +17,7 @@ type Config struct {
 	MongoDB          string
 	MongoUser        string
 	MongoPassword    string
+	MONGO_URI        string
 }
 
 func LoadConfig() (*Config, error) {
@@ -34,5 +35,6 @@ func LoadConfig() (*Config, error) {
 		MongoDB:          os.Getenv("MONGO_DB"),
 		MongoUser:        os.Getenv("MONGO_USER"),
 		MongoPassword:    os.Getenv("MONGO_PASSWORD"),
+		MONGO_URI:        os.Getenv("MONGO_URI"),
 	}, nil
 }

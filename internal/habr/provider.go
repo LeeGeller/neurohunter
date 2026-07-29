@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"neurohunter/internal/habr/salary"
+	"neurohunter/internal/utils"
 	"neurohunter/model"
 
 	"github.com/go-rod/rod"
@@ -129,6 +129,8 @@ func parseVacancy(
 	// Base info
 	// --------------------
 
+	vacancyID := utils.ParseVacancyID(href)
+
 	title := vacancyPage.
 		MustElement(".page-title__title").
 		MustText()
@@ -223,9 +225,9 @@ func parseVacancy(
 	if err == nil {
 		salaryInfo := salaryElement.MustText()
 
-		salaryFrom, salaryTo = salary.Parse(salaryInfo)
+		salaryFrom, salaryTo = utils.Parse(salaryInfo)
 
-		cur := salary.ParseCurrency(salaryInfo)
+		cur := utils.ParseCurrency(salaryInfo)
 
 		if cur != "" {
 			currency = &cur
@@ -259,6 +261,7 @@ func parseVacancy(
 	// --------------------
 
 	return model.Vacancy{
+		ID:           vacancyID,
 		Title:        title,
 		Company:      company,
 		WorkLocation: workLocation,

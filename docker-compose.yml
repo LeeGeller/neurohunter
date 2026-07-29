@@ -40,6 +40,14 @@ services:
     depends_on:
       - mongo
 
+  app:
+    build: .
+    image: app
+    ports:
+      - "${APP_PORT}:8000"
+    networks:
+      - neurohunter
+
 volumes:
   mongo_data:
     driver: local

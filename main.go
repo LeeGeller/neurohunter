@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"neurohunter/config"
+	"neurohunter/database"
 	"neurohunter/handlers"
 )
 
@@ -15,9 +17,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/search", handlers.SearchHandler)
+	mongoDB, err := database.ConnectMongoDB(config.MONGO_URI)
 
-	log.Printf("server started on :%s", config.AppPort)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer mongoDB.Disconnect(context.Background())
+
+	http.HandleFunc("/search", handlers.SearchHandler(mongoDB))
+
 	log.Fatal(http.ListenAndServe(":"+config.AppPort, nil))
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }

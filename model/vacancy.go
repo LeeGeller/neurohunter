@@ -3,6 +3,7 @@ package model
 import "time"
 
 type Vacancy struct {
+	ID           string
 	Title        string
 	Company      string
 	WorkLocation *string
