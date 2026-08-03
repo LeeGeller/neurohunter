@@ -1,1 +1,136 @@
+# =========================
+# Environment variables
+# =========================
+
 .env
+.env.*
+!.env.example
+
+
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+.coverage
+.coverage.*
+htmlcov/
+
+
+# =========================
+# Virtual environments
+# =========================
+
+.venv/
+venv/
+env/
+ENV/
+
+
+# =========================
+# Poetry
+# =========================
+
+poetry.toml
+
+
+# =========================
+# IDE / Editors
+# =========================
+
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+
+# =========================
+# OS
+# =========================
+
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+
+# =========================
+# Docker
+# =========================
+
+docker-compose.override.yml
+
+
+# =========================
+# MongoDB / PostgreSQL data
+# =========================
+
+data/
+mongo-data/
+postgres-data/
+
+*.db
+*.sqlite3
+
+
+# =========================
+# Node / Frontend
+# =========================
+
+node_modules/
+.next/
+out/
+dist/
+.npm/
+*.tsbuildinfo
+
+
+# =========================
+# Ollama / Local LLM
+# =========================
+
+ollama/
+models/
+*.gguf
+
+
+# =========================
+# Temporary files
+# =========================
+
+tmp/
+temp/
+*.tmp
+
+
+# =========================
+# Secrets / Keys
+# =========================
+
+*.pem
+*.key
+*.crt
+
+secrets/
