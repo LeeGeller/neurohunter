@@ -1,25 +1,32 @@
 """Configuration settings."""
 
-import os
-from pathlib import (
-    Path,
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
 )
 
-from dotenv import (
-    load_dotenv,
-)
 
-ENV_PATH = Path(".") / ".env"
-load_dotenv(ENV_PATH)
+class Settings(BaseSettings):
+    """Application settings."""
 
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-MONGO_URI = os.getenv("MONGO_URI")
-MONGO_DB = os.getenv("MONGO_DB")
-MONGO_PORT = os.getenv("MONGO_PORT")
+    postgres_host: str
+    postgres_port: int
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
 
-OLLAMA_HOST = os.getenv("OLLAMA_HOST")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
+    mongo_uri: str
+    mongo_db: str
+    mongo_port: int
+
+    ollama_host: str
+    ollama_model: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+
+settings = Settings()

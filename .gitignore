@@ -58,7 +58,6 @@ poetry.toml
 *.swp
 *.swo
 *~
-.vscode/
 
 # =========================
 # OS

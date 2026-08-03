@@ -1,17 +1,10 @@
 """NeuroHunter Analyzer Service main module."""
 
-from contextlib import (
-    asynccontextmanager,
-)
-
-from fastapi import (
-    FastAPI,
-)
+from contextlib import asynccontextmanager
 
 from app.api.routes.vacancies import router as vacancies_router
-from app.database.mongodb import (
-    create_mongo_client,
-)
+from app.database.mongodb import create_mongo_client
+from fastapi import FastAPI
 
 
 @asynccontextmanager

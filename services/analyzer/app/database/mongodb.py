@@ -5,10 +5,10 @@ from pymongo import (
 )
 
 from app.config.settings import (
-    MONGO_URI,
+    settings,
 )
 
 
 def create_mongo_client() -> AsyncMongoClient:
     """Create a MongoDB client."""
-    return AsyncMongoClient(MONGO_URI)
+    return AsyncMongoClient(settings.mongo_uri)

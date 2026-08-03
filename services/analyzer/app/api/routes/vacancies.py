@@ -1,13 +1,7 @@
 """Vacancy routes."""
 
-from fastapi import (
-    APIRouter,
-    Request,
-)
-
-from app.repositories.vacancy_repository import (
-    VacancyRepository,
-)
+from app.repositories.vacancy_repository import VacancyRepository
+from fastapi import APIRouter, Request
 
 router = APIRouter(
     prefix="/vacancies",
