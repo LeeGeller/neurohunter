@@ -1,11 +1,13 @@
 """Vacancy repository."""
 
-from typing import (
-    Optional,
-    Union,
+from pymongo.asynchronous.database import (
+    AsyncDatabase,
 )
 
-from pymongo.asynchronous.database import AsyncDatabase
+from services.analyzer.app.models.vacancy import (
+    Vacancy,
+)
+
 
 class VacancyRepository:
     """Vacancy repository."""
@@ -13,14 +15,14 @@ class VacancyRepository:
     def __init__(self, db: AsyncDatabase):
         self.collection = db["vacancies"]
 
-    async def get_all_vacancies(self) -> list[dict[str, Optional[Union[str, int]]]]:
+    async def get_all_vacancies(self) -> list[Vacancy]:
         """Get all vacancies from the database."""
         vacancies = []
 
         cursor = self.collection.find({})
 
         async for vacancy in cursor:
-            vacancy["_id"] = str(vacancy["_id"])
-            vacancies.append(vacancy)
+            vacancy.pop("_id", None)
+            vacancies.append(Vacancy(**vacancy))
 
         return vacancies

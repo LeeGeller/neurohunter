@@ -8,12 +8,9 @@ from fastapi import (
     FastAPI,
 )
 
+from app.api.routes.vacancies import router as vacancies_router
 from app.database.mongodb import (
     create_mongo_client,
-)
-
-from app.api.routes.vacancies import (
-    router as vacancies_router,
 )
 
 
