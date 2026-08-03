@@ -12,6 +12,10 @@ from app.database.mongodb import (
     create_mongo_client,
 )
 
+from app.api.routes.vacancies import (
+    router as vacancies_router,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,3 +46,5 @@ app = FastAPI(
 async def health():
     """Get health status of the service."""
     return {"status": "ok"}
+
+app.include_router(vacancies_router)
