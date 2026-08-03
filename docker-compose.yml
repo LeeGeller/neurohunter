@@ -48,9 +48,9 @@ services:
     networks:
       - neurohunter
 
-  app-analyzer:
+  api:
     build: ./services/analyzer
-    image: app-analyzer
+    image: api
     ports:
       - "${ANALYZER_PORT}:8001"
     env_file:

@@ -4,10 +4,9 @@ from pymongo.asynchronous.database import (
     AsyncDatabase,
 )
 
-from services.analyzer.app.models.vacancy import (
+from app.models.vacancy import (
     Vacancy,
 )
-
 
 class VacancyRepository:
     """Vacancy repository."""

@@ -21,3 +21,5 @@ MONGO_URI = os.getenv("MONGO_URI")
 MONGO_DB = os.getenv("MONGO_DB")
 MONGO_PORT = os.getenv("MONGO_PORT")
 
+OLLAMA_HOST = os.getenv("OLLAMA_HOST")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
