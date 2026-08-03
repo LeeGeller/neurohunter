@@ -48,6 +48,16 @@ services:
     networks:
       - neurohunter
 
+  app-analyzer:
+    build: ./services/analyzer
+    image: app-analyzer
+    ports:
+      - "${ANALYZER_PORT}:8001"
+    env_file:
+      - .env
+    networks:
+      - neurohunter
+
 volumes:
   mongo_data:
     driver: local
