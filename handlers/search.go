@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"neurohunter/database"
-	"neurohunter/internal/habr"
+	"neurohunter/internal/scraper/habr"
 )
 
 func SearchHandler(mongoDB *database.MongoDB) http.HandlerFunc {
