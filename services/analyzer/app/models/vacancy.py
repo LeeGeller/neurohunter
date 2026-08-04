@@ -19,37 +19,59 @@ class Vacancy(BaseModel):
     url: str
 
 
-class VacancyAnalysis(BaseModel):
-    """Analysis of the vacancy itself."""
+class VacancyFeatures(BaseModel):
+    """Extracts job vacancy attributes from the
+    description and work format.
+    """
 
     vacancy_id: str
 
-    # Job difficulty
-    difficulty: float
+    # Work schedule
+    work_days_per_week: float | None
+    work_hours_per_day: float | None
+    weekly_work_hours: float | None
+    work_schedule: str | None
+    flexible_schedule: bool | None
 
-    # Estimated workload
-    workload: float
+    # Overtime
+    overtime_expected: bool | None
+    overtime_frequency: str | None
 
-    # Social load
-    social_overload: float
+    # Work format
+    work_format: str | None
+    remote_possible: bool | None
+    office_required: bool | None
+    hybrid_possible: bool | None
 
-    # Communication load
-    communication_load: float
+    # Communication
+    client_communication: bool | None
+    team_communication: bool | None
+    customer_facing: bool | None
+    communication_frequency: str | None
+    meeting_frequency: str | None
 
-    # Uncertainty level
-    uncertainty_level: float
+    # Workload and pressure
+    multitasking_required: bool | None
+    deadline_pressure: str | None
+    task_changes_frequency: str | None
 
-    # Overtime risk
-    overtime_risk: float
+    # Task structure
+    task_clarity: str | None
+    task_predictability: str | None
+    task_independence: str | None
+    responsibility_level: str | None
 
-    # Positive aspects of the vacancy
-    strengths: list[str]
+    # Work environment
+    team_size: int | None
+    management_style: str | None
 
-    # Potential problems
-    risks: list[str]
+    # Employment conditions
+    employment_type: str | None
+    probation_period: str | None
+    salary_transparency: str | None
 
-    # Questions worth clarifying
-    questions_to_ask: list[str]
+    # Evidence extracted from the vacancy description
+    evidence: list[str]
 
 
 class VacancyMatch(BaseModel):
