@@ -12,19 +12,21 @@ class OllamaClient:
         self.model = model
         self.client = httpx.AsyncClient()
 
-    async def generate(self, promt: str) -> str:
+    async def generate(self, prompt: str) -> str:
         """Generate text using the Ollama LLM API."""
 
         payload = {
             "model": self.model,
-            "prompt": promt,
+            "prompt": prompt,
             "stream": False,
+            "think": False,
+
         }
 
         response = await self.client.post(
             f"{self.base_url}/api/generate",
             json=payload,
-            timout=120.0
+            timeout=120.0
         )
 
         response.raise_for_status()

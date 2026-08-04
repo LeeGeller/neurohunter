@@ -1,27 +1,20 @@
-from app.llm.client import (
-    OllamaClient,
-)
-from app.llm.service import (
-    VacancyFeaturesService,
-)
-from services.analyzer.app.llm.prompts import (
-    VACANCY_FEATURES_PROMPT,
-)
-from services.analyzer.app.models.vacancy import (
-    Vacancy,
-)
+import json
 
+from app.llm.client import OllamaClient
+from app.llm.prompts import VACANCY_FEATURES_PROMPT
+from app.models.vacancy import Vacancy
+from app.models.vacancy_features import VacancyFeatures
 
-class VacancyAnalayzer:
+class VacancyFeaturesExtractor:
     """Analyze vacancies using LLM."""
 
     def __init__(self, llm_client: OllamaClient) -> None:
         self.llm_client = llm_client
 
-    async def extract_fetures(self, vacancy: Vacancy) -> str:
+    async def extract_features(self, vacancy: Vacancy) -> VacancyFeatures:
         """Extract structured features from a vacancy using LLM."""
 
-        promt = VACANCY_FEATURES_PROMPT.format(
+        prompt = VACANCY_FEATURES_PROMPT.format(
             vacancy_id=vacancy.id,
             title=vacancy.title,
             company=vacancy.company,
@@ -32,4 +25,6 @@ class VacancyAnalayzer:
             description=vacancy.description,
         )
 
-        return await self.llm_client.generate(promt)
+        response = await self.llm_client.generate(prompt)
+
+        return VacancyFeatures(**json.loads(response))
