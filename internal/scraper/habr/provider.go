@@ -1,6 +1,8 @@
 package habr
 
 import (
+	"io"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -9,268 +11,237 @@ import (
 	"neurohunter/internal/utils"
 	"neurohunter/model"
 
-	"github.com/go-rod/rod"
+	"github.com/PuerkitoBio/goquery"
 )
 
+const baseURL = "https://career.habr.com"
+
+var client = &http.Client{
+	Timeout: 20 * time.Second,
+}
+
+func fetchHTML(link string) (io.ReadCloser, error) {
+	req, err := http.NewRequest(http.MethodGet, link, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set(
+		"User-Agent",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/138 Safari/537.36",
+	)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, &url.Error{
+			Op:  "GET",
+			URL: link,
+			Err: io.ErrUnexpectedEOF,
+		}
+	}
+
+	return resp.Body, nil
+}
+
 func FetchHabrVacancies(query string) ([]model.Vacancy, error) {
-	browser := rod.New().MustConnect()
+	searchURL := baseURL + "/vacancies?q=" + url.QueryEscape(query)
 
-	defer browser.MustClose()
+	body, err := fetchHTML(searchURL)
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
 
-	searchURL := "https://career.habr.com/vacancies?q=" + url.QueryEscape(query)
-
-	page := browser.
-		MustPage(searchURL).
-		MustWaitLoad()
-
-	defer page.MustClose()
-
-	// --------------------
-	// Collect vacancy links
-	// --------------------
-
-	vacancyElements := page.MustElements(".vacancy-card")
+	doc, err := goquery.NewDocumentFromReader(body)
+	if err != nil {
+		return nil, err
+	}
 
 	var vacancyURLs []string
 
-	for _, vacancy := range vacancyElements {
-		link, err := vacancy.Element(".vacancy-card__title-link")
-		if err != nil {
-			continue
+	doc.Find(".vacancy-card__title-link").Each(func(_ int, s *goquery.Selection) {
+		href, ok := s.Attr("href")
+		if !ok {
+			return
 		}
 
-		href := link.MustAttribute("href")
-		if href == nil {
-			continue
-		}
+		vacancyURLs = append(vacancyURLs, baseURL+href)
+	})
 
-		vacancyURLs = append(
-			vacancyURLs,
-			"https://career.habr.com"+*href,
-		)
-	}
+	var (
+		wg       sync.WaitGroup
+		sem      = make(chan struct{}, 25)
+		resultCh = make(chan model.Vacancy)
+	)
 
-	// --------------------
-	// Preparing for concurrent scraping
-	// --------------------
-
-	var wg sync.WaitGroup
-
-	//Max 25 goroutines
-	sem := make(chan struct{}, 25)
-
-	resultChan := make(chan model.Vacancy)
-
-	// --------------------
-	// Start scraping
-	// --------------------
-
-	for _, vacancyURL := range vacancyURLs {
+	for _, link := range vacancyURLs {
 		wg.Add(1)
 
-		go func(vacancyURL string) {
+		go func(link string) {
 			defer wg.Done()
 
-			// Получаем слот
 			sem <- struct{}{}
+			defer func() { <-sem }()
 
-			// Освобождаем слот
-			defer func() {
-				<-sem
-			}()
-
-			vacancy, err := parseVacancy(
-				browser,
-				vacancyURL,
-			)
-
+			vacancy, err := parseVacancy(link)
 			if err != nil {
 				return
 			}
 
-			resultChan <- vacancy
-
-		}(vacancyURL)
+			resultCh <- vacancy
+		}(link)
 	}
-
-	// --------------------
-	// Close channel after all goroutines finish
-	// --------------------
 
 	go func() {
 		wg.Wait()
-		close(resultChan)
+		close(resultCh)
 	}()
 
-	// --------------------
-	// Collect results
-	// --------------------
+	var vacancies []model.Vacancy
 
-	var result []model.Vacancy
-
-	for vacancy := range resultChan {
-		result = append(result, vacancy)
+	for vacancy := range resultCh {
+		vacancies = append(vacancies, vacancy)
 	}
 
-	return result, nil
+	return vacancies, nil
 }
 
-func parseVacancy(
-	browser *rod.Browser,
-	href string,
-) (model.Vacancy, error) {
-	vacancyPage := browser.
-		MustPage(href).
-		MustWaitLoad()
+func parseVacancy(link string) (model.Vacancy, error) {
+	body, err := fetchHTML(link)
+	if err != nil {
+		return model.Vacancy{}, err
+	}
+	defer body.Close()
 
-	defer vacancyPage.MustClose()
+	doc, err := goquery.NewDocumentFromReader(body)
+	if err != nil {
+		return model.Vacancy{}, err
+	}
 
-	// --------------------
-	// Base info
-	// --------------------
+	vacancyID := utils.ParseVacancyID(link)
 
-	vacancyID := utils.ParseVacancyID(href)
+	title := strings.TrimSpace(doc.Find(".page-title__title").First().Text())
 
-	title := vacancyPage.
-		MustElement(".page-title__title").
-		MustText()
+	company := strings.TrimSpace(doc.Find(".company_name").First().Text())
 
-	company := vacancyPage.
-		MustElement(".company_name").
-		MustText()
+	description := strings.TrimSpace(
+		doc.Find(".vacancy-description__text").First().Text(),
+	)
 
-	description := vacancyPage.
-		MustElement(".vacancy-description__text").
-		MustText()
+	var (
+		workLocation *string
+		workFormat   *string
+		salaryFrom   *int
+		salaryTo     *int
+		currency     *string
+		vacancyDate  time.Time
+	)
 
 	// --------------------
 	// Conditions
 	// --------------------
 
-	var workLocation *string
-	var workFormat *string
+	doc.Find("h2.content-section__title").EachWithBreak(func(_ int, s *goquery.Selection) bool {
 
-	conditionsTitle, err := vacancyPage.ElementR(
-		"h2.content-section__title",
-		"Условия",
-	)
-
-	if err == nil {
-		conditionsSection := conditionsTitle.
-			MustParent().
-			MustParent()
-
-		vacancyMeta, err := conditionsSection.Element(".vacancy-meta")
-
-		if err == nil {
-
-			// Cities
-			placeChips := vacancyMeta.MustElements(
-				`.basic-chip:has(.svg-icon--icon-placemark)`,
-			)
-
-			if len(placeChips) > 0 {
-				var cities []string
-
-				for _, placeChip := range placeChips {
-					workPlace := placeChip.
-						MustElement(".chip-with-icon__text").
-						MustText()
-
-					workPlace = strings.TrimSpace(workPlace)
-
-					if workPlace != "" {
-						cities = append(cities, workPlace)
-					}
-				}
-
-				if len(cities) > 0 {
-					location := strings.Join(cities, ", ")
-					workLocation = &location
-				}
-			}
-
-			// Work format
-			workFormatChip, err := vacancyMeta.Element(
-				`.basic-chip:has(.svg-icon--icon-format)`,
-			)
-
-			if err == nil {
-				format := strings.TrimSpace(
-					workFormatChip.
-						MustElement(".chip-with-icon__text").
-						MustText(),
-				)
-
-				if format != "" {
-					workFormat = &format
-				}
-			}
-
+		if strings.TrimSpace(s.Text()) != "Условия" {
+			return true
 		}
-	}
+
+		meta := s.Parent().Parent().Find(".vacancy-meta")
+
+		if meta.Length() == 0 {
+			return false
+		}
+
+		// Cities
+		var cities []string
+
+		meta.Find(".basic-chip").Each(func(_ int, chip *goquery.Selection) {
+
+			if chip.Find(".svg-icon--icon-placemark").Length() == 0 {
+				return
+			}
+
+			city := strings.TrimSpace(
+				chip.Find(".chip-with-icon__text").Text(),
+			)
+
+			if city != "" {
+				cities = append(cities, city)
+			}
+		})
+
+		if len(cities) > 0 {
+			location := strings.Join(cities, ", ")
+			workLocation = &location
+		}
+
+		// Work format
+		meta.Find(".basic-chip").Each(func(_ int, chip *goquery.Selection) {
+
+			if workFormat != nil {
+				return
+			}
+
+			if chip.Find(".svg-icon--icon-format").Length() == 0 {
+				return
+			}
+
+			format := strings.TrimSpace(
+				chip.Find(".chip-with-icon__text").Text(),
+			)
+
+			if format != "" {
+				workFormat = &format
+			}
+		})
+
+		return false
+	})
 
 	// --------------------
 	// Salary
 	// --------------------
 
-	var salaryFrom *int
-	var salaryTo *int
-	var currency *string
+	salaryInfo := strings.TrimSpace(
+		doc.Find(".basic-salary").First().Text(),
+	)
 
-	salaryElement, err := vacancyPage.
-		Timeout(2 * time.Second).
-		Element(".basic-salary")
-
-	if err == nil {
-		salaryInfo := salaryElement.MustText()
-
+	if salaryInfo != "" {
 		salaryFrom, salaryTo = utils.Parse(salaryInfo)
 
 		cur := utils.ParseCurrency(salaryInfo)
-
 		if cur != "" {
 			currency = &cur
 		}
 	}
 
 	// --------------------
-	// Date published
+	// Published date
 	// --------------------
 
-	var vacancyDate time.Time
-
-	dateElement, err := vacancyPage.Element("time.basic-date")
-
-	if err == nil {
-		datetime := dateElement.MustAttribute("datetime")
-
-		if datetime != nil {
-			publishedAt, err := time.Parse(
-				time.RFC3339,
-				*datetime,
-			)
-
-			if err == nil {
-				vacancyDate = publishedAt
-			}
+	if datetime, ok := doc.Find("time.basic-date").Attr("datetime"); ok {
+		if parsed, err := time.Parse(time.RFC3339, datetime); err == nil {
+			vacancyDate = parsed
 		}
 	}
-	// --------------------
-	// Return vacancy
-	// --------------------
 
 	return model.Vacancy{
 		ID:           vacancyID,
 		Title:        title,
 		Company:      company,
+		Description:  description,
 		WorkLocation: workLocation,
 		WorkFormat:   workFormat,
-		URL:          href,
-		Description:  description,
 		SalaryFrom:   salaryFrom,
 		SalaryTo:     salaryTo,
 		Currency:     currency,
+		URL:          link,
 		VacancyDate:  vacancyDate,
 	}, nil
 }
