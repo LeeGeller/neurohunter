@@ -1,9 +1,18 @@
 import json
 
-from app.llm.client import OllamaClient
-from app.llm.prompts import VACANCY_FEATURES_PROMPT
-from app.models.vacancy import Vacancy
-from app.models.vacancy_features import VacancyFeatures
+from app.llm.client import (
+    OllamaClient,
+)
+from app.llm.prompts import (
+    VACANCY_FEATURES_PROMPT,
+)
+from app.models.vacancy import (
+    Vacancy,
+)
+from app.models.vacancy_features import (
+    VacancyFeatures,
+)
+
 
 class VacancyFeaturesExtractor:
     """Analyze vacancies using LLM."""

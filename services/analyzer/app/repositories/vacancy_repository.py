@@ -1,7 +1,12 @@
 """Vacancy repository."""
 
-from app.models.vacancy import Vacancy
-from pymongo.asynchronous.database import AsyncDatabase
+from pymongo.asynchronous.database import (
+    AsyncDatabase,
+)
+
+from app.models.vacancy import (
+    Vacancy,
+)
 
 
 class VacancyRepository:

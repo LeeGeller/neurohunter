@@ -1,14 +1,20 @@
 """Vacancy routes."""
 
-from app.repositories.vacancy_repository import VacancyRepository
-from fastapi import APIRouter, Request
+from fastapi import (
+    APIRouter,
+    Request,
+)
+
+from app.repositories.vacancy_repository import (
+    VacancyRepository,
+)
 
 router = APIRouter(
     prefix="/vacancies",
     tags=["Vacancies"],
 )
 
-@router.get("/")
+@router.get('/')
 async def get_vacancies(request: Request):
     """Get all vacancies."""
     db = request.app.state.mongo['neurohunter']
