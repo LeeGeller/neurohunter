@@ -55,6 +55,8 @@ services:
       - "${ANALYZER_PORT}:8001"
     env_file:
       - .env
+    volumes:
+      - ./services/analyzer:/app
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
