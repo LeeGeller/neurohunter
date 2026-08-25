@@ -1,12 +1,14 @@
 from pydantic import (
     BaseModel,
     EmailStr,
+    Field,
 )
 
 class UserRegister(BaseModel):
     """User registration schema."""
 
     email: EmailStr
+    password: str = Field(min_length=8)
 
 
 class UserRegisterToken(BaseModel):

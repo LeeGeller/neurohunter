@@ -8,11 +8,9 @@ from fastapi import (
     FastAPI,
 )
 from app.api.routes import routers
-
 from app.database.mongodb import (
     create_mongo_client,
 )
-from app.api.routes import routers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

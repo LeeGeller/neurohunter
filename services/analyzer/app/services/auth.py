@@ -20,12 +20,12 @@ from app.models.user import (
     User,
     UserToken,
 )
-from services.email import (
+
+from app.services.email import (
     send_verification_email,
 )
-from utils.security import (
-    hash_password,
-)
+
+from utils.security import hash_password
 
 
 def generate_verification_token() -> str:
