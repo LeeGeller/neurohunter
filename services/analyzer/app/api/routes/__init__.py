@@ -1,5 +1,5 @@
-from .vacancies.vacancies import router as vacancies_router
-from .auth.auth import router as auth_router
+from .auth import auth_router
+from .vacancies import vacancies_router
 
 routers = [
     vacancies_router,
