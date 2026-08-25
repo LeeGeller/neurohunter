@@ -20,11 +20,11 @@ from app.models.user import (
     User,
     UserToken,
 )
-from services.analyzer.utils.security import (
-    hash_password,
-)
-from app.services.email import (
+from app.services.email.email import (
     send_verification_email,
+)
+from app.utils.security import (
+    hash_password,
 )
 
 

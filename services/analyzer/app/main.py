@@ -1,14 +1,22 @@
 """NeuroHunter Analyzer Service main module."""
 
-from contextlib import asynccontextmanager
+from contextlib import (
+    asynccontextmanager,
+)
 
-from app.api.routes.vacancies import router as vacancies_router
-from app.database.mongodb import create_mongo_client
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+)
+from app.api.routes import routers
 
+from app.database.mongodb import (
+    create_mongo_client,
+)
+from app.api.routes import routers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     app.state.mongo = create_mongo_client()
 
     try:
@@ -37,4 +45,5 @@ async def health():
     """Get health status of the service."""
     return {"status": "ok"}
 
-app.include_router(vacancies_router)
+for router in routers:
+    app.include_router(router)

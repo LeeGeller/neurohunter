@@ -32,7 +32,7 @@ async_session = async_sessionmaker(
     expire_on_commit=False,
 )
 
-async def get_session() -> AsyncGenerator(AsyncSession, None):
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Get database session."""
 
     async with async_session() as session:
