@@ -1,6 +1,10 @@
 """Postgres database connection."""
 
 
+from collections.abc import (
+    AsyncGenerator,
+)
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -16,7 +20,7 @@ DATABASE_URL = (
     f'{settings.postgres_user}:'
     f'{settings.postgres_password}@'
     f'{settings.postgres_host}:'
-    f'{settings.postgres_port}'
+    f'{settings.postgres_port}/'
     f'{settings.postgres_db}'
 )
 
@@ -27,3 +31,9 @@ async_session = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
+async def get_session() -> AsyncGenerator(AsyncSession, None):
+    """Get database session."""
+
+    async with async_session() as session:
+        yield session

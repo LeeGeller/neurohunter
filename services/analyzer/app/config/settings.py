@@ -32,5 +32,11 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    email_host: str
+    email_port: int
+    email_user: str
+    email_password: str
+    email_from: str
+    email_verification_url: str
 
 settings = Settings()
