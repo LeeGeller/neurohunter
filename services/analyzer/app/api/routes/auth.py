@@ -15,8 +15,10 @@ from app.schemas.auth import (
     UserRegister,
 )
 from app.services.auth import (
+    generate_verification_token,
     register_user,
     verify_user_by_token,
+    authorize_user,
 )
 
 
@@ -60,4 +62,25 @@ async def verify_user(
 
     return {
         'message': 'Email успешно подтверждён.',
+    }
+
+
+@router.post('/authorization')
+async def authorization(
+    email: str = Query(...),
+    password: str = Query(...),
+    db: AsyncSession = Depends(get_session),
+):
+    """Verify user by login and password."""
+
+    await authorize_user(
+        session=db,
+        email=email,
+        password=password,
+    )
+
+    token = generate_verification_token()
+
+    return {
+        'token': token,
     }

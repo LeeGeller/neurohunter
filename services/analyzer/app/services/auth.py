@@ -20,12 +20,13 @@ from app.models.user import (
     User,
     UserToken,
 )
-
 from app.services.email import (
     send_verification_email,
 )
-
-from utils.security import hash_password
+from utils.security import (
+    hash_password,
+    verify_password,
+)
 
 
 def generate_verification_token() -> str:
@@ -102,13 +103,13 @@ async def verify_user_by_token(
     if not user_token:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Токен не найден.",
+            detail='Токен не найден.',
         )
 
     if user_token.expires_at < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Токен истек.",
+            detail='Токен истек.',
         )
 
     user_result = await session.execute(
@@ -122,10 +123,49 @@ async def verify_user_by_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Пользователь не найден.",
+            detail='Пользователь не найден.',
         )
 
     user.is_verified = True
 
     await session.delete(user_token)
     await session.commit()
+
+
+async def authorize_user(
+    session: AsyncSession,
+    email: str,
+    password: str,
+)-> User:
+    """Verify user by password."""
+
+    user_result = await session.execute(
+        select(User).where(
+            User.user_email == email,
+        ),
+    )
+
+    user = user_result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Пользователь не найден.',
+        )
+
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Пользователь не подтверждён.',
+        )
+
+    if not verify_password(
+        password=password,
+        hashed_password=user.password_hash,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Неверный email или пароль.',
+        )
+
+    return user

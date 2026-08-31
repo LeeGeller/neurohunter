@@ -9,6 +9,6 @@ def hash_password(password: str) -> str:
     return password_hash.hash(password)
 
 
-def verifi_password(password: str, hashed_password: str) -> bool:
+def verify_password(password: str, hashed_password: str) -> bool:
     """Verify a password."""
     return password_hash.verify(password, hashed_password)
