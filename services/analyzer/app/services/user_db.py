@@ -3,6 +3,7 @@
 from collections.abc import (
     AsyncGenerator,
 )
+from uuid import UUID
 
 from fastapi import (
     Depends,
@@ -24,7 +25,7 @@ from app.models.user import (
 
 async def get_user_db(
     session: AsyncSession = Depends(get_session),
-) -> AsyncGenerator[SQLAlchemyUserDatabase[User], None]:
+) -> AsyncGenerator[SQLAlchemyUserDatabase[User, UUID], None]:
     """Get user database."""
 
     yield SQLAlchemyUserDatabase(session, User)

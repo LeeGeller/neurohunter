@@ -1,19 +1,25 @@
 """User manager services."""
 
 import uuid
+from collections.abc import (
+    AsyncGenerator,
+)
 
+from fastapi import (
+    Depends,
+)
 from fastapi_users import (
     BaseUserManager,
 )
 
+from app.config.settings import (
+    settings,
+)
 from app.models.user import (
     User,
 )
 from app.services.user_db import (
     get_user_db,
-)
-from services.analyzer.app.config import (
-    settings,
 )
 
 
@@ -30,9 +36,10 @@ class UserManager(BaseUserManager[User, uuid.UUID]):
     ) -> None:
         print(f'Пользователь {user.id} зарегистрирован.')
 
-    async def get_user_manager(
-        user_db=Depends(get_user_db),
-    ):
-        """Get user manager."""
 
-        yield UserManager(user_db)
+async def get_user_manager(
+    user_db=Depends(get_user_db),
+) -> AsyncGenerator[UserManager, None]:
+    """Get user manager."""
+
+    yield UserManager(user_db)
