@@ -1,537 +1,417 @@
 # NeuroHunter
 
-**NeuroHunter** — Open Source-проект для сбора, структурированного анализа и персонализированной оценки вакансий с учётом особенностей восприятия, рабочей нагрузки и индивидуальных предпочтений пользователя.
+**NeuroHunter** — OpenSource-сервис для анализа IT-вакансий и оценки их соответствия особенностям и предпочтениям кандидата.
 
-Проект предназначен не только для поиска вакансий по профессиональным навыкам, но и для анализа условий работы:
-
-* рабочий график;
-* формат взаимодействия;
-* уровень коммуникации;
-* предсказуемость задач;
-* когнитивная нагрузка;
-* потенциальные риски перегрузки.
-
-> Проект находится в активной разработке.
+Проект анализирует вакансии с помощью LLM, структурирует полученные данные и в дальнейшем использует их для персонализированного matching.
 
 ---
 
-# Основная идея
-
-Обычный поиск вакансий отвечает на вопрос:
-
-> **«Подхожу ли я этой вакансии профессионально?»**
-
-NeuroHunter должен дополнительно отвечать:
-
-> **«Подходит ли эта вакансия мне как рабочая среда?»**
-
-Для этого система разделяет анализ на несколько этапов:
+## Архитектура
 
 ```text
-Источники вакансий
-        ↓
-Go Parsers
-        ↓
-MongoDB
-        ↓
-Python Analyzer
-        ↓
-LLM Feature Extraction
-        ↓
-VacancyFeatures
-        ↓
-User Profile
-        ↓
-Matching Algorithm
-        ↓
-VacancyMatch
+                         ┌─────────────────┐
+                         │   Habr Career   │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │       Go        │
+                         │     Parser      │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │     MongoDB     │
+                         │   Raw Vacancies │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │     Python      │
+                         │     Analyzer    │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │      LLM        │
+                         │ Vacancy Analysis│
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │    PostgreSQL   │
+                         │ Structured Data │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │     FastAPI     │
+                         │       API       │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │    Frontend     │
+                         │      TODO       │
+                         └─────────────────┘
 ```
 
 ---
 
-# Текущий статус
-
-## Этап 1. Сбор и хранение вакансий
-
-* [x] Сбор вакансий на Go
-* [x] Подготовка структуры проекта
-* [x] Настройка Docker Compose
-* [x] Подключение MongoDB
-* [x] Хранение сырых данных вакансий
-
----
-
-## Этап 2. Анализ вакансий
-
-* [x] Подключение Python Analyzer
-* [x] Получение вакансий из MongoDB
-* [x] Подключение Ollama
-* [x] Подключение локальной LLM Qwen3
-* [x] Передача вакансии в модель
-* [x] Создание модели `VacancyFeatures`
-* [x] Извлечение структурированных признаков
-* [x] Валидация результата через Pydantic
-* [x] Добавление `evidence` для каждого результата
-* [x] Первый интеграционный тест полного pipeline
-
----
-
-## Этап 3. Пользовательский слой
-
-### Завершено
-
-* [x] Проектирование модели `UserProfile`
-* [x] Проектирование модели `UserFeatures`
-* [x] Настройка PostgreSQL
-* [x] Настройка SQLAlchemy
-* [x] Настройка Alembic
-* [x] Создание таблицы пользователей
-* [x] Создание таблицы токенов
-* [x] Реализация регистрации пользователя
-* [x] Хеширование пароля
-* [x] Отправка verification email
-* [x] Подтверждение email через токен
-* [x] Проверка регистрации и подтверждения через PostgreSQL
-
-### В работе
-
-* [ ] Система авторизации
-* [ ] Access / Refresh tokens
-* [ ] Авторизация пользователя
-* [ ] Заполнение `UserProfile`
-* [ ] Генерация `UserFeatures`
-
----
-
-# Архитектура
-
-Проект состоит из нескольких основных компонентов.
-
----
-
-## Go Parser
-
-Отвечает за сбор вакансий из внешних источников.
-
-Основные задачи:
-
-* получение вакансий;
-* нормализация данных;
-* извлечение базовых полей;
-* сохранение данных.
-
-Pipeline:
+# Структура проекта
 
 ```text
-Vacancy Source
-      ↓
-Go Parser
-      ↓
-MongoDB
+neurohunter/
+├── parser/                  # Go-парсер вакансий
+│
+├── services/
+│   └── analyzer/            # Python-сервис анализа
+│       ├── app/
+│       │   ├── api/          # API routes
+│       │   ├── config/       # Configuration
+│       │   ├── database/     # Database connections
+│       │   ├── models/       # SQLAlchemy models
+│       │   ├── schemas/      # Pydantic schemas
+│       │   ├── services/     # Business logic
+│       │   └── main.py
+│       │
+│       ├── migrations/       # Alembic migrations
+│       ├── Dockerfile
+│       ├── docker-compose.yml
+│       ├── alembic.ini
+│       └── pyproject.toml
+│
+└── README.md
 ```
-
----
-
-## MongoDB
-
-MongoDB используется для хранения исходных вакансий.
-
-На этом этапе данные сохраняются максимально близко к оригинальному виду, чтобы не терять информацию для последующего анализа.
-
-MongoDB хранит:
-
-* описание вакансии;
-* компанию;
-* зарплату;
-* формат работы;
-* ссылку;
-* исходные поля источника.
-
----
-
-## Python Analyzer
-
-Python-сервис отвечает за интеллектуальную обработку вакансий.
-
-Основные задачи:
-
-* получение вакансий из MongoDB;
-* подготовка данных;
-* отправка текста в LLM;
-* получение структурированного результата;
-* проверка через Pydantic.
-
----
-
-# LLM Feature Extraction
-
-Для анализа используется локальная LLM через [Ollama](https://ollama.com/).
-
-Текущая модель:
-
-```text
-Qwen3 8B
-```
-
-LLM используется для извлечения информации из текста вакансии.
-
-Она не принимает окончательное решение:
-
-> «Эта вакансия подходит пользователю».
-
-Вместо этого она отвечает:
-
-> «Какие характеристики есть у этой вакансии?»
-
-Pipeline:
-
-```text
-Vacancy Description
-        ↓
-LLM
-        ↓
-VacancyFeatures
-```
-
-После этого структурированные признаки могут использоваться алгоритмом персонального сопоставления:
-
-```text
-VacancyFeatures
-        ↓
-Matching Algorithm
-        ↓
-VacancyMatch
-```
-
----
-
-# Модель данных
-
-## Vacancy
-
-Исходная модель вакансии:
-
-```python
-class Vacancy(BaseModel):
-    id: str
-    title: str
-    vacancy_date: datetime
-    description: str
-    company: str
-    work_location: str | None
-    work_format: str | None
-    salary_from: int | None
-    salary_to: int | None
-    currency: str | None
-    url: str
-```
-
----
-
-## VacancyFeatures
-
-`VacancyFeatures` содержит признаки, извлечённые из текста вакансии.
-
-Пример:
-
-```json
-{
-  "vacancy_id": "12345",
-
-  "work_days_per_week": 5,
-  "work_hours_per_day": 8,
-
-  "flexible_schedule": false,
-
-  "remote_possible": true,
-  "office_required": false,
-
-  "client_communication": true,
-  "meeting_frequency": "daily",
-
-  "multitasking_required": true,
-
-  "task_predictability": null,
-
-  "evidence": [
-    "Работа 5/2 с 9:00 до 18:00",
-    "Возможен удалённый формат",
-    "Необходимо взаимодействие с клиентами"
-  ]
-}
-```
-
-Если данных недостаточно, система сохраняет:
-
-```json
-{
-    "field": null
-}
-```
-
-Это позволяет отличать:
-
-* `true` — характеристика явно присутствует;
-* `false` — характеристика явно отсутствует;
-* `null` — информации недостаточно.
-
----
-
-# Пользовательский профиль
-
-NeuroHunter использует отдельную модель пользователя.
-
-## UserProfile
-
-Содержит данные, которые пользователь указывает самостоятельно:
-
-```python
-class UserProfile(BaseModel):
-
-    age: int | None
-
-    profession: str | None
-
-    experience_years: float | None
-
-    preferred_work_days_per_week: float | None
-
-    preferred_work_hours_per_day: float | None
-
-    flexible_schedule_needed: bool | None
-
-    communication_preferences: str | None
-
-    multitasking_tolerance: str | None
-
-    deadline_tolerance: str | None
-
-    preferred_team_size: str | None
-
-    preferred_management_style: str | None
-
-    conditions: list[str]
-
-    about_me: str | None
-```
-
----
-
-## UserFeatures
-
-После анализа профиля создаётся нормализованное представление пользователя:
-
-```text
-UserProfile
-      ↓
-Feature Extraction
-      ↓
-UserFeatures
-```
-
-`UserFeatures` используется системой сопоставления вакансий.
-
-Примеры признаков:
-
-* необходимый уровень коммуникации;
-* предпочтительный график;
-* переносимость многозадачности;
-* потребность в предсказуемости задач;
-* предпочтительный стиль управления.
-
----
-
-# Персонализированная оценка
-
-После появления пользовательского профиля система будет создавать:
-
-```python
-class VacancyMatch(BaseModel):
-
-    vacancy_id: str
-
-    user_id: str
-
-    profile_match: float
-
-    skills_match: float
-
-    experience_match: float
-
-    work_format_match: float
-
-    burnout_risk: float
-
-    workload_risk: float
-
-    social_overload_risk: float
-
-    explanation: str
-```
-
-Pipeline:
-
-```text
-Vacancy
-    ↓
-VacancyFeatures
-
-User
-    ↓
-UserFeatures
-
-        ↓
-
-Matching Algorithm
-
-        ↓
-
-VacancyMatch
-```
-
-На текущем этапе этот слой является следующим уровнем разработки после авторизации и пользовательского профиля.
-
----
-
-# Аутентификация
-
-Пользовательский слой уже использует PostgreSQL и SQLAlchemy.
-
-Текущая схема:
-
-```text
-Registration
-      ↓
-User created
-      ↓
-Verification Token
-      ↓
-Email
-      ↓
-Email Verification
-      ↓
-is_verified = true
-```
-
-В PostgreSQL используются основные таблицы:
-
-```text
-users
-user_tokens
-alembic_version
-```
-
-После подтверждения email пользователь получает статус:
-
-```text
-is_verified = true
-```
-
-Следующий шаг — полноценная авторизация пользователя.
-
-Планируемый flow:
-
-```text
-Login
-   ↓
-Credentials validation
-   ↓
-Access Token
-   +
-Refresh Token
-   ↓
-Authenticated API
-```
-
----
-
-# Почему анализ разделён на два этапа
-
-NeuroHunter не использует LLM как «чёрный ящик», который принимает решения.
-
-Система разделяет:
-
-## 1. Извлечение информации
-
-LLM отвечает:
-
-> «Что известно о вакансии?»
-
-Например:
-
-* график;
-* формат работы;
-* уровень коммуникации;
-* количество задач;
-* требования.
-
----
-
-## 2. Персональная оценка
-
-Алгоритм отвечает:
-
-> «Как эти условия подходят конкретному человеку?»
-
-Это делает систему:
-
-* более прозрачной;
-* проверяемой;
-* управляемой;
-* менее зависимой от субъективного решения LLM.
 
 ---
 
 # Технологический стек
 
-## Backend
+## Parser
 
 * Go
-* Python
-* FastAPI
-* Pydantic
-* SQLAlchemy
-
-## Data
-
+* goquery
 * MongoDB
+
+## Analyzer
+
+* Python 3.13
+* FastAPI
+* FastAPI Users
+* SQLAlchemy
+* Alembic
+* Pydantic
 * PostgreSQL
-
-## AI
-
-* Ollama
-* Qwen3 8B
-* LLM Feature Extraction
+* MongoDB
+* Ollama / LLM
+* FastAPI Mail
 
 ## Infrastructure
 
 * Docker
 * Docker Compose
-* Alembic
-
-## Planned
-
-* Redis
-* Celery
-* RAG
-* Next.js
-* TypeScript
-* Tailwind CSS
+* Nginx — планируется
+* Redis — планируется
 
 ---
 
-# План развития
+# Этап 1. Сбор вакансий
+
+### Завершено
+
+* [x] Go-парсер
+* [x] Получение вакансий
+* [x] Парсинг данных вакансии
+* [x] Подготовка raw vacancy data
+* [x] Подключение MongoDB
+* [x] Хранение исходных вакансий
+* [x] Защита от повторного создания одинаковых вакансий
+
+### В работе
+
+* [ ] Подключение дополнительных источников вакансий
+* [ ] Улучшение обработки ошибок
+* [ ] Очередь обработки вакансий через Redis
+
+---
+
+# Этап 2. Анализ вакансий
+
+### Завершено
+
+* [x] Python analyzer
+* [x] Получение raw vacancy из MongoDB
+* [x] Передача вакансии в LLM
+* [x] Анализ требований вакансии
+* [x] Формирование структурированного результата
+* [x] Pydantic validation
+* [x] Сохранение результата в PostgreSQL
+
+### В работе
+
+* [ ] Улучшение промптов
+* [ ] Улучшение качества анализа
+* [ ] Повторный анализ вакансий
+* [ ] RAG
+
+---
+
+# Этап 3. Пользовательский слой
+
+### Завершено
+
+* [x] Проектирование пользовательской модели
+* [x] Настройка PostgreSQL
+* [x] Настройка SQLAlchemy
+* [x] Настройка Alembic
+* [x] Создание таблицы `users`
+* [x] Регистрация пользователя
+* [x] Хеширование пароля
+* [x] JWT authentication
+* [x] Авторизация пользователя
+* [x] Получение текущего пользователя
+* [x] Email verification
+* [x] Генерация verification JWT
+* [x] Отправка verification email
+* [x] Подтверждение email
+* [x] Проверка `is_verified`
+* [x] Повторная отправка verification email
+
+### В работе
+
+* [ ] Access / Refresh tokens
+* [ ] `UserProfile`
+* [ ] `UserFeatures`
+* [ ] Настройка пользовательских предпочтений
+* [ ] Связывание пользователя с персонализированным matching
+
+---
+
+# Аутентификация
+
+Пользовательский слой реализован с использованием `FastAPI Users`.
+
+Текущий authentication flow:
 
 ```text
-[✓] Сбор вакансий
+POST /auth/register
+        │
+        ▼
+Создание User
+        │
+        ▼
+Генерация verification JWT
+        │
+        ▼
+Отправка email
+        │
+        ▼
+POST /auth/verify
+        │
+        ▼
+is_verified = true
+        │
+        ▼
+POST /auth/login
+        │
+        ▼
+JWT authentication
+```
+
+## Основные endpoints
+
+```text
+POST /auth/register
+POST /auth/login
+POST /auth/request-verify-token
+POST /auth/verify
+GET  /auth/current-user
+```
+
+### Регистрация
+
+```http
+POST /auth/register
+```
+
+Пример:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+После регистрации создаётся пользователь со следующими значениями:
+
+```text
+is_active = true
+is_superuser = false
+is_verified = false
+```
+
+---
+
+## Email verification
+
+После регистрации пользователь получает письмо с verification URL.
+
+Verification token представляет собой JWT и не хранится в PostgreSQL как отдельная запись.
+
+Секреты токенов хранятся в переменных окружения:
+
+```text
+RESET_PASSWORD_TOKEN_SECRET
+VERIFICATION_TOKEN_SECRET
+```
+
+Процесс подтверждения:
+
+```text
+Registration
+      │
+      ▼
+Verification JWT
+      │
+      ▼
+Email
+      │
+      ▼
+User opens verification link
+      │
+      ▼
+Frontend
+      │
+      ▼
+POST /auth/verify
+      │
+      ▼
+is_verified = true
+```
+
+На текущем этапе frontend ещё не реализован, поэтому endpoint `/auth/verify` тестируется напрямую через API.
+
+После появления frontend verification URL будет вести на frontend-страницу, которая передаст token в:
+
+```http
+POST /auth/verify
+```
+
+---
+
+# PostgreSQL
+
+Основные данные приложения хранятся в PostgreSQL.
+
+Текущая пользовательская таблица:
+
+```text
+users
+├── id
+├── email
+├── hashed_password
+├── is_active
+├── is_superuser
+└── is_verified
+```
+
+Verification JWT и reset-password JWT не хранятся в отдельных таблицах.
+
+Миграции управляются через Alembic.
+
+```text
+migrations/
+└── versions/
+```
+
+---
+
+# MongoDB
+
+MongoDB используется для хранения исходных данных вакансий.
+
+```text
+Go Parser
+    │
+    ▼
+MongoDB
+    │
+    ▼
+Python Analyzer
+```
+
+MongoDB хранит raw vacancy data до её анализа и структурирования.
+
+---
+
+# LLM Analysis
+
+LLM используется для анализа вакансий и извлечения структурированных характеристик.
+
+Общий flow:
+
+```text
+Raw Vacancy
+     │
+     ▼
+LLM
+     │
+     ▼
+Structured Vacancy Features
+     │
+     ▼
+Pydantic validation
+     │
+     ▼
+PostgreSQL
+```
+
+В дальнейшем результат анализа будет использоваться для персонализированного matching.
+
+---
+
+# Планируемая модель matching
+
+Основная идея NeuroHunter — не просто искать вакансии по ключевым словам, а оценивать их соответствие конкретному пользователю.
+
+Планируемый flow:
+
+```text
+User
+ │
+ ├── UserProfile
+ │
+ └── UserFeatures
+          │
+          ▼
+   VacancyFeatures
+          │
+          ▼
+   Matching Algorithm
+          │
+          ▼
+    VacancyMatch
+          │
+          ▼
+ Personalized Results
+```
+
+---
+
+# Roadmap
+
+```text
+[✓] Go vacancy parser
         ↓
-[✓] Хранение вакансий
+[✓] MongoDB raw storage
         ↓
-[✓] Получение вакансий из MongoDB
+[✓] Python analyzer
         ↓
-[✓] Подключение LLM
+[✓] LLM integration
         ↓
-[✓] Извлечение VacancyFeatures
+[✓] VacancyFeatures
         ↓
 [✓] Pydantic validation
         ↓
@@ -541,81 +421,151 @@ LLM отвечает:
         ↓
 [✓] Alembic
         ↓
-[✓] Регистрация пользователей
+[✓] User registration
         ↓
 [✓] Email verification
         ↓
-[ ] Authentication
+[✓] JWT authentication
         ↓
 [ ] UserProfile
         ↓
 [ ] UserFeatures
         ↓
-[ ] Улучшение качества анализа
-        ↓
 [ ] VacancyMatch
-        ↓
-[ ] Оценка рисков нагрузки
         ↓
 [ ] RAG
         ↓
 [ ] Frontend
+        ↓
+[ ] Redis
+        ↓
+[ ] Nginx
         ↓
 [ ] Production deployment
 ```
 
 ---
 
-# Цель проекта
+# Development
 
-NeuroHunter должен превратить поиск работы из простого поиска по ключевым словам в систему, которая учитывает реальные условия работы и индивидуальные предпочтения человека.
+Для запуска Python-сервиса используется Poetry.
 
-Главная идея:
+```bash
+poetry install
+```
 
-> **Найти не просто работу, которую человек способен выполнять, а работу, в которой он сможет устойчиво работать.**
+Запуск через Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+Проверка контейнеров:
+
+```bash
+docker compose ps
+```
+
+Логи API:
+
+```bash
+docker compose logs -f api
+```
 
 ---
 
-# Статус
+# Database migrations
 
-Проект находится на стадии разработки MVP.
+Создание новой миграции:
 
-На текущем этапе уже работает связка:
-
-```text
-Raw Vacancy
-      ↓
-Structured Vacancy
-      ↓
-LLM Feature Extraction
-      ↓
-VacancyFeatures
+```bash
+alembic revision --autogenerate -m "migration description"
 ```
 
-И параллельно реализован пользовательский слой:
+Применение миграций:
+
+```bash
+alembic upgrade head
+```
+
+Откат последней миграции:
+
+```bash
+alembic downgrade -1
+```
+
+---
+
+# Environment variables
+
+Основные переменные окружения:
+
+```env
+# PostgreSQL
+POSTGRES_HOST=
+POSTGRES_PORT=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+# MongoDB
+MONGO_URI=
+MONGO_DB=
+MONGO_PORT=
+
+# LLM
+OLLAMA_HOST=
+OLLAMA_MODEL=
+
+# Email
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_USER=
+EMAIL_PASSWORD=
+EMAIL_FROM=
+EMAIL_VERIFICATION_URL=
+
+# FastAPI Users
+RESET_PASSWORD_TOKEN_SECRET=
+VERIFICATION_TOKEN_SECRET=
+```
+
+Секретные значения не должны попадать в Git.
+
+---
+
+# Current status
+
+На текущем этапе реализован основной backend foundation:
 
 ```text
-Registration
-      ↓
+Go
+ │
+ ▼
+MongoDB
+ │
+ ▼
+Python
+ │
+ ▼
+LLM
+ │
+ ▼
 PostgreSQL
-      ↓
-Email Verification
-      ↓
-Verified User
+ │
+ ▼
+FastAPI
+ │
+ ├── Registration
+ ├── Login
+ ├── JWT authentication
+ ├── Email verification
+ └── Current user
 ```
 
-Следующая ключевая задача:
+Следующий крупный этап — **пользовательский профиль и персонализированный matching вакансий**.
 
-```text
-Verified User
-      ↓
-Authentication
-      ↓
-UserProfile
-      ↓
-UserFeatures
-      ↓
-Personalized Matching
-      ↓
-VacancyMatch
+---
+
+```
 ```
