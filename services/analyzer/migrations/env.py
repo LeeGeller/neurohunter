@@ -24,7 +24,6 @@ from app.database.base import (
 
 from app.models.user import (
     User,
-    UserToken,
 )
 
 # this is the Alembic Config object, which provides

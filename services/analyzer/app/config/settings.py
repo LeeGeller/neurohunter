@@ -39,4 +39,7 @@ class Settings(BaseSettings):
     email_from: str
     email_verification_url: str
 
+    reset_password_token_secret: str
+    verification_token_secret: str
+
 settings = Settings()

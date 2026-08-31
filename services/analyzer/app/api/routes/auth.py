@@ -1,11 +1,10 @@
+from collections.abc import (
+    AsyncGenerator,
+)
+
 from fastapi import (
     APIRouter,
-    Depends,
-    status,
-    Query,
-)
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
+
 )
 
 from app.database.postgres import (
@@ -13,12 +12,6 @@ from app.database.postgres import (
 )
 from app.schemas.auth import (
     UserRegister,
-)
-from app.services.auth import (
-    generate_verification_token,
-    register_user,
-    verify_user_by_token,
-    authorize_user,
 )
 
 
@@ -28,59 +21,3 @@ router = APIRouter(
 )
 
 
-@router.post(
-    '/register',
-    status_code=status.HTTP_201_CREATED,
-)
-async def register(
-    user_data: UserRegister,
-    db: AsyncSession = Depends(get_session),
-):
-    """Register a new user."""
-
-    await register_user(
-        session=db,
-        email=user_data.email,
-        password=user_data.password,
-    )
-
-    return {
-        'email': user_data.email,
-    }
-
-@router.get('/verify')
-async def verify_user(
-    token: str = Query(...),
-    db: AsyncSession = Depends(get_session),
-):
-    """Verify user by token."""
-
-    await verify_user_by_token(
-        session=db,
-        token=token,
-    )
-
-    return {
-        'message': 'Email успешно подтверждён.',
-    }
-
-
-@router.post('/authorization')
-async def authorization(
-    email: str = Query(...),
-    password: str = Query(...),
-    db: AsyncSession = Depends(get_session),
-):
-    """Verify user by login and password."""
-
-    await authorize_user(
-        session=db,
-        email=email,
-        password=password,
-    )
-
-    token = generate_verification_token()
-
-    return {
-        'token': token,
-    }
