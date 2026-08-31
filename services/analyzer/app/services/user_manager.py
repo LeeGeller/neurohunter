@@ -21,6 +21,9 @@ from app.models.user import (
 from app.services.user_db import (
     get_user_db,
 )
+from app.services.email import (
+    send_verification_email,
+)
 
 
 class UserManager(BaseUserManager[User, uuid.UUID]):
@@ -29,12 +32,28 @@ class UserManager(BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.reset_password_token_secret
     verification_token_secret = settings.verification_token_secret
 
+    def parse_id(self, value: str) -> uuid.UUID:
+        return uuid.UUID(value)
+
     async def on_after_register(
         self,
         user: User,
         request=None,
     ) -> None:
-        print(f'Пользователь {user.id} зарегистрирован.')
+        """Handle actions after registration."""
+
+        await self.request_verify(user, request)
+
+    async def on_after_request_verify(
+        self,
+        user: User,
+        token: str,
+        request=None,
+    ) -> None:
+        """Send verification email."""
+        print(f'ON_AFTER_REGISTER: {user.email}')
+
+        await send_verification_email(user.email, token)
 
 
 async def get_user_manager(

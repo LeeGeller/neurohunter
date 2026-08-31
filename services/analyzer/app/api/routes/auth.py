@@ -1,17 +1,17 @@
 from fastapi import (
     APIRouter,
-    Depends,
 )
 
 from app.schemas.auth import (
-    UserResponse,
+    UserCreate,
+    UserRead,
 )
 from app.services.auth_backend import (
     auth_backend,
 )
 from app.services.fastapi_users import (
-    current_user,
     fastapi_users,
+    verification_router,
 )
 
 router = APIRouter(
@@ -23,9 +23,13 @@ router.include_router(
     fastapi_users.get_auth_router(auth_backend),
 )
 
+router.include_router(
+    fastapi_users.get_register_router(
+        UserRead,
+        UserCreate,
+    ),
+)
 
-@router.get('/current-user')
-async def get_current_user(
-    user: UserResponse = Depends(current_user)
-) -> UserResponse:
-    return user
+router.include_router(
+    verification_router,
+)

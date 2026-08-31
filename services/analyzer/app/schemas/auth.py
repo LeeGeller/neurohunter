@@ -1,14 +1,13 @@
 import uuid
 
-from pydantic import (
-    BaseModel,
-    EmailStr,
+from fastapi_users import (
+    schemas,
 )
 
 
-class UserResponse(BaseModel):
-    """User response schema."""
+class UserRead(schemas.BaseUser[uuid.UUID]):
+    """User read schema."""
 
-    user_id: uuid.UUID
-    email: EmailStr
-    is_verified: bool
+
+class UserCreate(schemas.BaseUserCreate):
+    """User create schema."""

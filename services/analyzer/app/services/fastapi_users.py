@@ -12,9 +12,13 @@ from app.services.auth_backend import (
     auth_backend,
 )
 from app.services.user_manager import (
-    UserManager,
     get_user_manager,
 )
+from app.schemas.auth import (
+    UserRead,
+)
+
+
 
 fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager,
@@ -22,3 +26,4 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
 )
 
 current_user = fastapi_users.current_user()
+verification_router = fastapi_users.get_verify_router(UserRead)

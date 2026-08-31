@@ -7,7 +7,9 @@ from fastapi_mail import (
     MessageType,
 )
 
-from app.config.settings import settings
+from app.config.settings import (
+    settings,
+)
 
 mail_config = ConnectionConfig(
     MAIL_USERNAME=settings.email_user,
