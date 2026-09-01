@@ -57,7 +57,11 @@ class UserProfileSchema(BaseModel):
 
     user_id: uuid.UUID
 
-    age: int
+    age: int = Field(
+        default=None,
+        ge=13,
+        le=100,
+    )
     profession: str | None = None
     experience_years: float | None = None
     education: EducationLevel | None = None
@@ -125,82 +129,82 @@ class UserProfileSchema(BaseModel):
 
     # Work importance
 
-    income_importance: float | None = Field(
+    income_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    stability_importance: float | None = Field(
+    stability_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    interesting_tasks_importance: float | None = Field(
+    interesting_tasks_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    professional_growth_importance: float | None = Field(
+    professional_growth_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    horizontal_growth_importance: float | None = Field(
+    horizontal_growth_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    vertical_growth_importance: float | None = Field(
+    vertical_growth_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    autonomy_level_importance: float | None = Field(
+    autonomy_level_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    flexible_schedule_needed_importance: float | None = Field(
+    flexible_schedule_needed_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    work_life_balance_importance: float | None = Field(
+    work_life_balance_importance: float | int = Field(
         default=None,
         ge=0,
         le=10,
     )
-    remote_work_importance: float | None = Field(
+    remote_work_importance: float | int = Field(
         default=None,
         ge=0,
         le=10,
     )
-    social_environment_importance: float | None = Field(
+    social_environment_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    recognition_importance: float | None = Field(
+    recognition_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    meaningful_work_importance: float | None = Field(
+    meaningful_work_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    variety_importance: float | None = Field(
+    variety_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    creativity_importance: float | None = Field(
+    creativity_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
     )
-    dms_importance: float | None = Field(
+    dms_importance: int | None = Field(
         default=None,
         ge=0,
         le=10,
