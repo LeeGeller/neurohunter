@@ -1,5 +1,8 @@
 """Features models for LLM."""
 import uuid
+from typing import (
+    TYPE_CHECKING,
+)
 
 from sqlalchemy import (
     ARRAY,
@@ -16,9 +19,11 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.user import (
-    User,
-)
+
+if TYPE_CHECKING:
+    from app.models.user import (
+        User,
+    )
 
 
 class UserFeatures(Base):

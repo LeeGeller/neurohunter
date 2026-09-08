@@ -2,8 +2,13 @@
 from fastapi import (
     APIRouter,
     Depends,
+    File,
     HTTPException,
+    UploadFile,
     status,
+)
+from sqlalchemy import (
+    delete,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -11,6 +16,9 @@ from sqlalchemy.ext.asyncio import (
 
 from app.database.postgres import (
     get_session,
+)
+from app.models.resume import (
+    ResumeDocument,
 )
 from app.models.user import (
     User,
@@ -24,6 +32,10 @@ from app.schemas.user import (
 from app.services.fastapi_users import (
     current_user,
 )
+from app.services.resume_parser import (
+    ResumeTextExtractor,
+)
+
 
 router = APIRouter(
     prefix='/profile',
@@ -107,3 +119,43 @@ async def update_profile(
     await session.refresh(profile)
 
     return profile
+
+
+@router.post(
+    '/resume',
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_resume(
+    file: UploadFile = File(...),
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """Upload and save user resume file."""
+
+    if not file.filename.endswith('.pdf') and not file.filename.endswith('.docx'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Неподдерживаемый формат файла.',
+        )
+
+    extractor = ResumeTextExtractor()
+    extraxtored_resume = await extractor.extract(file)
+
+    await session.execute(
+        delete(ResumeDocument).where(
+            ResumeDocument.user_id == user.id
+        ),
+    )
+
+    resume = ResumeDocument(
+        user_id=user.id,
+        text=extraxtored_resume,
+    )
+
+    session.add(resume)
+
+    await session.commit()
+
+    return {
+        'resume': extraxtored_resume,
+    }

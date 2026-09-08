@@ -1,11 +1,14 @@
 """Resume document models."""
 
 import uuid
+from typing import (
+    TYPE_CHECKING,
+)
 
 from sqlalchemy import (
     UUID,
     ForeignKey,
-    String,
+    Text,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -16,9 +19,11 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.user import (
-    User,
-)
+
+if TYPE_CHECKING:
+    from app.models.user import (
+        User,
+    )
 
 
 class ResumeDocument(Base):
@@ -44,17 +49,7 @@ class ResumeDocument(Base):
         uselist=False,
     )
 
-    file_name: Mapped[str] = mapped_column(
-        String,
-        nullable=False,
-    )
-
-    file_path: Mapped[str] = mapped_column(
-        String,
-        nullable=False,
-    )
-
-    mime_type: Mapped[str] = mapped_column(
-        String,
+    text: Mapped[str] = mapped_column(
+        Text,
         nullable=False,
     )

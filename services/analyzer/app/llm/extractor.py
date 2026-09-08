@@ -4,6 +4,7 @@ from app.llm.client import (
     OllamaClient,
 )
 from app.llm.prompts import (
+    RESUME_FEATURES_PROMPT,
     VACANCY_FEATURES_PROMPT,
 )
 from app.models.vacancy import (
@@ -11,6 +12,9 @@ from app.models.vacancy import (
 )
 from app.models.vacancy_features import (
     VacancyFeatures,
+)
+from app.schemas.resume_features import (
+    ResumeFeatures,
 )
 
 
@@ -37,3 +41,25 @@ class VacancyFeaturesExtractor:
         response = await self.llm_client.generate(prompt)
 
         return VacancyFeatures(**json.loads(response))
+
+
+class ResumeFeaturesExtractor:
+    """Analyze resumes using LLM."""
+
+    def __init__(self, llm_client: OllamaClient) -> None:
+        self.llm_client = llm_client
+
+    async def extract_features(self, resume: str) -> dict:
+        """Extract structured features from a resume using LLM."""
+
+        prompt = RESUME_FEATURES_PROMPT.format(
+            resume_text=resume
+        )
+
+        response = await self.llm_client.generate(prompt)
+
+        print("\n=== RAW LLM RESPONSE ===")
+        print(response)
+        print("=== END RAW RESPONSE ===\n")
+
+        return json.loads(response)
