@@ -1,4 +1,4 @@
-"""Portfolio features schemas."""
+"""Resume features schemas."""
 import uuid
 
 from pydantic import (
@@ -7,7 +7,7 @@ from pydantic import (
 )
 
 
-class ResumeFeatures(BaseModel):
+class ResumeFeaturesSchema(BaseModel):
     """Resume features extracted for LLM."""
 
     user_id: uuid.UUID

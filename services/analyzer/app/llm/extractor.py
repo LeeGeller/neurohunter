@@ -13,9 +13,6 @@ from app.models.vacancy import (
 from app.models.vacancy_features import (
     VacancyFeatures,
 )
-from app.schemas.resume_features import (
-    ResumeFeatures,
-)
 
 
 class VacancyFeaturesExtractor:

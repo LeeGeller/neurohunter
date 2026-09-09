@@ -6,7 +6,9 @@ from typing import (
 )
 
 from sqlalchemy import (
+    ARRAY,
     UUID,
+    Float,
     ForeignKey,
     Text,
 )
@@ -52,4 +54,52 @@ class ResumeDocument(Base):
     text: Mapped[str] = mapped_column(
         Text,
         nullable=False,
+    )
+
+
+class ResumeFeatures(Base):
+    """Resume features schema for vacancy matching."""
+
+    __tablename__ = 'resume_features'
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('users.id'),
+        primary_key=True,
+    )
+    user: Mapped['User'] = relationship(
+        back_populates='resume_features',
+    )
+
+    job_titles = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    hard_skills = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    soft_skills = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    experience = mapped_column(
+        Float,
+        nullable=True,
+    )
+    projects = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    weaknesses = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    strengths = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
+    experience_resume = mapped_column(
+        ARRAY(Text),
+        default=list,
     )

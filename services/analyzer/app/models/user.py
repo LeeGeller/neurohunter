@@ -28,11 +28,9 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.features import (
-    UserFeatures,
-)
 from app.models.resume import (
     ResumeDocument,
+    ResumeFeatures,
 )
 
 
@@ -55,6 +53,48 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
         back_populates='user',
         uselist=False,
     )
+
+    resume_features: Mapped['ResumeFeatures'] = relationship(
+        back_populates='user',
+        uselist=False,
+    )
+
+
+class UserFeatures(Base):
+    """User features schema for vacancy matching."""
+
+    __tablename__ = 'user_features'
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('users.id'),
+        primary_key=True,
+    )
+    user: Mapped['User'] = relationship(
+        back_populates='user_features',
+    )
+
+
+    # Parameters used for vacancy matching
+    hard_constraints: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+    )
+    preferences: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+    )
+    tolerances: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+    )
+
+    # Additional context for LLM to better understand the user
+    context: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+    )
+
 
 class UserProfile(Base):
     """User profile model.
