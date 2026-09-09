@@ -79,6 +79,28 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_AMQP_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    networks:
+      - neurohunter
+
+  celery:
+    build: ./services/analyzer
+    image: celery
+    volumes:
+      - ./services/analyzer:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - neurohunter
+    depends_on:
+      - rabbitmq
+
 volumes:
   mongo_data:
     driver: local
