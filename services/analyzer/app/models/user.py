@@ -12,6 +12,7 @@ from sqlalchemy import (
     ARRAY,
     UUID,
     Boolean,
+    DateTime,
     Float,
     ForeignKey,
     Integer,
@@ -407,4 +408,34 @@ class UserProfile(Base):
     about_me: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
+    )
+
+
+class RefreshToken(Base):
+    """Refresh token model."""
+
+    __tablename__ = 'refresh_tokens'
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('users.id'),
+        nullable=False,
+    )
+    token_hash: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        unique=True,
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    expires_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
     )
