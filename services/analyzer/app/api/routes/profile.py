@@ -35,6 +35,9 @@ from app.services.fastapi_users import (
 from app.services.resume_parser import (
     ResumeTextExtractor,
 )
+from app.tasks.user_profile import (
+    analyze_user_profile,
+)
 
 
 router = APIRouter(
@@ -63,6 +66,9 @@ async def create_profile(
     session.add(profile)
 
     await session.commit()
+
+    analyze_user_profile.delay(user_id=profile.user_id)
+
     await session.refresh(profile)
 
     return profile
@@ -116,6 +122,9 @@ async def update_profile(
         setattr(profile, key, value)
 
     await session.commit()
+
+    analyze_user_profile.delay(user_id=profile.user_id)
+
     await session.refresh(profile)
 
     return profile

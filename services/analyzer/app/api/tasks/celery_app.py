@@ -1,14 +1,19 @@
-from celery  import (
+import os
+
+from celery import (
     Celery,
 )
-
-import os
 
 
 celery_app = Celery(
     'analyzer',
     broker=os.getenv('CELERY_BROKER_URL'),
     include=[
-        'app.tasks.user_profile',
+        'app.api.tasks.user_profile',
     ],
+)
+
+celery_app.conf.update(
+    control_queue_exclusive=True,
+    event_queue_exclusive=True,
 )

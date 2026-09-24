@@ -92,6 +92,7 @@ services:
   celery:
     build: ./services/analyzer
     image: celery
+    command: celery -A app.api.tasks.celery_app:celery_app worker --loglevel=info
     volumes:
       - ./services/analyzer:/app
     extra_hosts:

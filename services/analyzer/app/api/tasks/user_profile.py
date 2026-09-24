@@ -8,6 +8,9 @@ from sqlalchemy import (
     select,
 )
 
+from app.config.settings import (
+    settings,
+)
 from app.database.postgres import (
     get_session,
 )
@@ -20,9 +23,6 @@ from app.llm.extractor import (
 from app.models.user import (
     UserFeatures,
     UserProfile,
-)
-from app.config.settings import (
-    settings,
 )
 
 

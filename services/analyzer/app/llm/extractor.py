@@ -11,7 +11,7 @@ from app.llm.prompts import (
 from app.models.vacancy import (
     Vacancy,
 )
-from app.models.vacancy_features import (
+from app.models.vacancy import (
     VacancyFeatures,
 )
 from app.models.user import (
