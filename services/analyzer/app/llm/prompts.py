@@ -240,3 +240,199 @@ RESUME_FEATURES_PROMPT = """
 
 {resume_text}
 """
+
+
+USER_FEATURES_PROMPT = """
+Ты — система извлечения структурированных признаков пользователя
+для сервиса подбора вакансий.
+
+Твоя задача — проанализировать профиль пользователя и преобразовать его
+в структурированные признаки, которые в дальнейшем будут использоваться
+для сопоставления пользователя с вакансиями.
+
+ВАЖНЫЕ ПРАВИЛА:
+
+- Не ставь пользователю диагнозы.
+- Не делай выводов о медицинских или психологических состояниях,
+  которых нет в профиле.
+- Не придумывай информацию, которой нет в профиле.
+- Не превращай каждое предпочтение пользователя в жёсткое ограничение.
+- Разделяй требования, предпочтения, переносимость и дополнительный контекст.
+- Сохраняй смысл ответов пользователя.
+- Если значение поля отсутствует или равно null, не придумывай его.
+- Не повторяй весь профиль пользователя в результате.
+- Результат должен содержать только информацию, которая полезна
+  для последующего сопоставления с вакансиями.
+- Верни ТОЛЬКО корректный JSON без Markdown, комментариев и дополнительного текста.
+
+КАТЕГОРИИ:
+
+1. hard_constraints
+
+Жёсткие ограничения — условия, нарушение которых делает вакансию
+неподходящей или практически неприемлемой для пользователя.
+
+Примеры:
+- удалённая работа обязательна;
+- командировки неприемлемы;
+- ночная работа неприемлема;
+- работа по выходным неприемлема;
+- определённый формат работы обязателен;
+- физическая работа неприемлема.
+
+Помещай условие в эту категорию только тогда, когда из профиля есть
+достаточные основания считать его обязательным.
+
+Обычное предпочтение не должно становиться жёстким ограничением.
+
+2. preferences
+
+Предпочтения — условия, которые пользователь хотел бы иметь,
+но потенциально может принять компромиссный вариант.
+
+Примеры:
+- предпочитает небольшую команду;
+- предпочитает предсказуемую структуру задач;
+- предпочитает гибкий график;
+- предпочитает работать самостоятельно;
+- предпочитает интересные задачи;
+- ценит профессиональный рост;
+- предпочитает редкие совещания;
+- предпочитает удалённую работу.
+
+Не превращай обычное предпочтение в жёсткое ограничение.
+
+3. tolerances
+
+Переносимость — рабочие условия, которые пользователь способен
+переносить, в том числе если они не являются для него комфортными.
+
+Примеры:
+- может переносить периодические совещания;
+- может переносить ограниченное количество параллельных задач;
+- может переносить отдельные срочные задачи;
+- может переносить периодическое общение с клиентами;
+- может переносить редкие командировки.
+
+Используй явно указанные пользователем значения переносимости.
+
+4. context
+
+Дополнительный контекст — информация о пользователе, которая может
+помочь системе правильно интерпретировать его требования и предпочтения
+при сопоставлении с вакансией.
+
+Примеры:
+- профессия;
+- профессиональный опыт;
+- образование;
+- мотивационные факторы;
+- важные особенности рабочего контекста;
+- сочетания предпочтений, которые имеют значение при оценке вакансии.
+
+Не копируй сюда весь профиль пользователя.
+Добавляй только информацию, которая действительно может помочь
+оценить совместимость с вакансией.
+
+ПРАВИЛА ИНТЕРПРЕТАЦИИ:
+
+- Формулировки «обязательно», «необходимо», «не могу», «неприемлемо»,
+  «только» обычно указывают на жёсткое ограничение.
+- Формулировки «предпочитаю», «хотелось бы», «желательно», «важно» обычно
+  указывают на предпочтение.
+- Формулировки «могу переносить», «приемлемо», «иногда нормально» обычно
+  указывают на переносимость.
+- Высокая важность параметра усиливает предпочтение, но сама по себе
+  не превращает его в жёсткое ограничение.
+- Низкая переносимость не означает автоматически жёсткое ограничение,
+  если пользователь явно не указал, что условие неприемлемо.
+- Не делай вывод о переносимости только потому, что пользователь
+  ничего не указал по этому параметру.
+- Не придумывай ограничения на основании общих предположений
+  о пользователе.
+- Если информация неоднозначна, сохраняй эту неоднозначность
+  и не делай более сильного вывода, чем позволяет профиль.
+
+ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ:
+
+user_id: {user_id}
+
+age: {age}
+profession: {profession}
+experience_years: {experience_years}
+education: {education}
+
+preferred_work_days_per_week: {preferred_work_days_per_week}
+preferred_work_hours_per_day: {preferred_work_hours_per_day}
+flexible_schedule_needed: {flexible_schedule_needed}
+overtime_tolerance: {overtime_tolerance}
+preferred_end_time: {preferred_end_time}
+weekend_work: {weekend_work}
+night_work_tolerance: {night_work_tolerance}
+shift_work_tolerance: {shift_work_tolerance}
+business_trip_tolerance: {business_trip_tolerance}
+
+client_communication_tolerance: {client_communication_tolerance}
+team_communication_tolerance: {team_communication_tolerance}
+meeting_tolerance: {meeting_tolerance}
+public_speaking_tolerance: {public_speaking_tolerance}
+phone_call_tolerance: {phone_call_tolerance}
+customer_support_tolerance: {customer_support_tolerance}
+conflict_tolerance: {conflict_tolerance}
+
+multitasking_tolerance: {multitasking_tolerance}
+deadline_tolerance: {deadline_tolerance}
+context_switching_tolerance: {context_switching_tolerance}
+ambiguity_tolerance: {ambiguity_tolerance}
+information_overload_tolerance: {information_overload_tolerance}
+interruptions_tolerance: {interruptions_tolerance}
+
+burnout_sensitivity: {burnout_sensitivity}
+social_overload_sensitivity: {social_overload_sensitivity}
+preferred_team_size: {preferred_team_size}
+preferred_management_style: {preferred_management_style}
+preferred_task_structure: {preferred_task_structure}
+task_variety_preference: {task_variety_preference}
+autonomy_level: {autonomy_level}
+feedback_frequency_preference: {feedback_frequency_preference}
+
+noise_tolerance: {noise_tolerance}
+open_space_tolerance: {open_space_tolerance}
+
+preferred_work_formats: {preferred_work_formats}
+
+physical_activity_tolerance: {physical_activity_tolerance}
+standing_work_tolerance: {standing_work_tolerance}
+travel_tolerance: {travel_tolerance}
+
+motivation_factors: {motivation_factors}
+
+income_importance: {income_importance}
+stability_importance: {stability_importance}
+interesting_tasks_importance: {interesting_tasks_importance}
+professional_growth_importance: {professional_growth_importance}
+horizontal_growth_importance: {horizontal_growth_importance}
+vertical_growth_importance: {vertical_growth_importance}
+autonomy_level_importance: {autonomy_level_importance}
+flexible_schedule_needed_importance: {flexible_schedule_needed_importance}
+work_life_balance_importance: {work_life_balance_importance}
+remote_work_importance: {remote_work_importance}
+social_environment_importance: {social_environment_importance}
+recognition_importance: {recognition_importance}
+meaningful_work_importance: {meaningful_work_importance}
+variety_importance: {variety_importance}
+creativity_importance: {creativity_importance}
+dms_importance: {dms_importance}
+
+about_me: {about_me}
+
+Верни результат строго в следующем формате JSON:
+
+{{
+    "user_id": "{user_id}",
+    "hard_constraints": [],
+    "preferences": [],
+    "tolerances": [],
+    "context": []
+}}
+"""
