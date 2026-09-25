@@ -407,7 +407,7 @@ class UserProfileUpdate(BaseModel):
     overtime_tolerance: OvertimeTolerance | None = None
     preferred_end_time: time | None = None
     weekend_work: WeekendWork | None = None
-    night_work_tolerance: bool | None = None
+    night_work_tolerance: NightWorkTolerance | None = None
     shift_work_tolerance: ShiftWorkTolerance | None = None
     business_trip_tolerance: BusinessTripTolerance | None = None
 

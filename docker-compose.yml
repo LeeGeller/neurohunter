@@ -68,7 +68,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-
+    ports:
+      - "15432:5432"
     networks:
       - neurohunter
     volumes:
@@ -92,7 +93,7 @@ services:
   celery:
     build: ./services/analyzer
     image: celery
-    command: celery -A app.api.tasks.celery_app:celery_app worker --loglevel=info
+    command: celery -A app.api.tasks.celery_app:celery_app worker --loglevel=info --concurrency=1
     volumes:
       - ./services/analyzer:/app
     extra_hosts:

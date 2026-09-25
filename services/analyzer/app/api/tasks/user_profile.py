@@ -51,7 +51,7 @@ async def _analyze_user_profile(user_id: uuid.UUID) -> None:
             raise ValueError(f'Не найден профиль для пользоватея: {user_id}')
 
         llm_model = OllamaClient(
-            base_url=settings.ollama_url,
+            base_url=settings.ollama_host,
             model=settings.ollama_model
         )
         extractor = UserFeaturesExtractor(
@@ -69,7 +69,6 @@ async def _analyze_user_profile(user_id: uuid.UUID) -> None:
 
         if not old_user_features:
             user_features = UserFeatures(
-                user_id=user_id,
                 **features,
             )
             session.add(user_features)

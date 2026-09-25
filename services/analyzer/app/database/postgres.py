@@ -10,7 +10,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
+from sqlalchemy.pool import (
+    NullPool,
+)
 from app.config.settings import (
     settings,
 )
@@ -24,7 +26,10 @@ DATABASE_URL = (
     f'{settings.postgres_db}'
 )
 
-engine = create_async_engine(DATABASE_URL)
+engine = create_async_engine(
+    DATABASE_URL,
+    poolclass=NullPool,
+)
 
 async_session = async_sessionmaker(
     engine,

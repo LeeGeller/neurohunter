@@ -35,10 +35,9 @@ from app.services.fastapi_users import (
 from app.services.resume_parser import (
     ResumeTextExtractor,
 )
-from app.tasks.user_profile import (
+from app.api.tasks.user_profile import (
     analyze_user_profile,
 )
-
 
 router = APIRouter(
     prefix='/profile',
