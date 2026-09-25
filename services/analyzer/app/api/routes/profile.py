@@ -14,6 +14,12 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.api.tasks.resume import (
+    analyze_resume,
+)
+from app.api.tasks.user_profile import (
+    analyze_user_profile,
+)
 from app.database.postgres import (
     get_session,
 )
@@ -34,9 +40,6 @@ from app.services.fastapi_users import (
 )
 from app.services.resume_parser import (
     ResumeTextExtractor,
-)
-from app.api.tasks.user_profile import (
-    analyze_user_profile,
 )
 
 router = APIRouter(
@@ -163,6 +166,8 @@ async def upload_resume(
     session.add(resume)
 
     await session.commit()
+
+    analyze_resume.delay(user_id=user.id)
 
     return {
         'resume': extraxtored_resume,

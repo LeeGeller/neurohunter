@@ -12,6 +12,9 @@ from sqlalchemy import (
     ForeignKey,
     Text,
 )
+from sqlalchemy.dialects.postgresql import (
+    JSONB,
+)
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -100,6 +103,6 @@ class ResumeFeatures(Base):
         default=list,
     )
     experience_resume = mapped_column(
-        ARRAY(Text),
+        JSONB,
         default=list,
     )

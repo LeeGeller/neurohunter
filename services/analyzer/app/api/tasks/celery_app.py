@@ -10,6 +10,7 @@ celery_app = Celery(
     broker=os.getenv('CELERY_BROKER_URL'),
     include=[
         'app.api.tasks.user_profile',
+        'app.api.tasks.resume',
     ],
 )
 
