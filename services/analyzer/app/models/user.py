@@ -4,6 +4,9 @@ import uuid
 from datetime import (
     time,
 )
+from typing import (
+    Union,
+)
 
 from fastapi_users.db import (
     SQLAlchemyBaseUserTableUUID,
@@ -19,6 +22,9 @@ from sqlalchemy import (
     String,
     Text,
     Time,
+)
+from sqlalchemy.dialects.postgresql import (
+    JSONB,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -75,11 +81,15 @@ class UserFeatures(Base):
         back_populates='user_features',
     )
 
+    job_titles: Mapped[list[Text]] = mapped_column(
+        ARRAY(Text),
+        default=list,
+    )
 
     # Parameters used for vacancy matching
-    hard_constraints: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
-        default=list,
+    hard_constraints: Mapped[JSONB] = mapped_column(
+        JSONB,
+        default=dict,
     )
     preferences: Mapped[list[str]] = mapped_column(
         ARRAY(String),
