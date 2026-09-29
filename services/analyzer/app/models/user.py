@@ -68,7 +68,23 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 
 class UserFeatures(Base):
-    """User features schema for vacancy matching."""
+    """User features schema for vacancy matching.
+
+    This schema is used to store user preferences, hard constraints,
+    and tolerances for vacancy matching.
+
+    Hard constraints: salary, experience_years, education,
+    night_work_tolerance, shift_work_tolerance,
+    business_trip_tolerance.
+
+    Attributes:
+        user_id: User ID.
+        job_titles: List of job titles.
+        hard_constraints: List with dict of hard constraints.
+        preferences: List of preferences.
+        tolerances: List of tolerances.
+        context: List of context.
+    """
 
     __tablename__ = 'user_features'
 
