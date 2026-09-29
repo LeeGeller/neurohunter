@@ -81,7 +81,7 @@ class UserFeatures(Base):
         back_populates='user_features',
     )
 
-    job_titles: Mapped[list[Text]] = mapped_column(
+    job_titles: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
