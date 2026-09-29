@@ -126,6 +126,11 @@ class UserProfile(Base):
         nullable=True,
     )
 
+    salary: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
     experience_years: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
