@@ -5,17 +5,36 @@ from app.llm.client import (
 )
 from app.llm.prompts import (
     RESUME_FEATURES_PROMPT,
-    VACANCY_FEATURES_PROMPT,
     USER_FEATURES_PROMPT,
-)
-from app.models.vacancy import (
-    Vacancy,
-)
-from app.models.vacancy import (
-    VacancyFeatures,
+    VACANCY_FEATURES_PROMPT,
 )
 from app.models.user import (
     UserProfile,
+)
+from app.models.vacancy import (
+    Vacancy,
+    VacancyFeatures,
+)
+from app.schemas.profile_enums import (
+    AmbiguityTolerance,
+    AutonomyLevel,
+    BusinessTripTolerance,
+    ContextSwitchingTolerance,
+    DeadlineTolerance,
+    FeedbackFrequencyPreference,
+    InformationOverloadTolerance,
+    InterruptionsTolerance,
+    MeetingTolerance,
+    NightWorkTolerance,
+    NoiseTolerance,
+    OvertimeTolerance,
+    PhoneCallTolerance,
+    PhysicalActivityTolerance,
+    PreferredTaskStructure,
+    PublicSpeakingTolerance,
+    ShiftWorkTolerance,
+    TaskVarietyPreference,
+    WeekendWork,
 )
 
 
@@ -37,11 +56,69 @@ class VacancyFeaturesExtractor:
             salary_from=vacancy.salary_from or "",
             salary_to=vacancy.salary_to or "",
             description=vacancy.description,
+
+            overtime_values=", ".join(
+                item.value for item in OvertimeTolerance
+            ),
+            night_work_values=", ".join(
+                item.value for item in NightWorkTolerance
+            ),
+            shift_work_values=", ".join(
+                item.value for item in ShiftWorkTolerance
+            ),
+            business_trip_values=", ".join(
+                item.value for item in BusinessTripTolerance
+            ),
+            weekend_work_values=", ".join(
+                item.value for item in WeekendWork
+            ),
+            meeting_values=", ".join(
+                item.value for item in MeetingTolerance
+            ),
+            phone_call_values=", ".join(
+                item.value for item in PhoneCallTolerance
+            ),
+            public_speaking_values=", ".join(
+                item.value for item in PublicSpeakingTolerance
+            ),
+            deadline_values=", ".join(
+                item.value for item in DeadlineTolerance
+            ),
+            context_switching_values=", ".join(
+                item.value for item in ContextSwitchingTolerance
+            ),
+            task_structure_values=", ".join(
+                item.value for item in PreferredTaskStructure
+            ),
+            task_variety_values=", ".join(
+                item.value for item in TaskVarietyPreference
+            ),
+            autonomy_values=", ".join(
+                item.value for item in AutonomyLevel
+            ),
+            feedback_values=", ".join(
+                item.value for item in FeedbackFrequencyPreference
+            ),
+            noise_values=", ".join(
+                item.value for item in NoiseTolerance
+            ),
+            physical_activity_values=", ".join(
+                item.value for item in PhysicalActivityTolerance
+            ),
+            ambiguity_values=", ".join(
+                item.value for item in AmbiguityTolerance
+            ),
+            information_load_values=", ".join(
+                item.value for item in InformationOverloadTolerance
+            ),
+            interruptions_values=", ".join(
+                item.value for item in InterruptionsTolerance
+            ),
         )
 
         response = await self.llm_client.generate(prompt)
 
-        return VacancyFeatures(**json.loads(response))
+        return VacancyFeatures.model_validate_json(response)
 
 
 class ResumeFeaturesExtractor:

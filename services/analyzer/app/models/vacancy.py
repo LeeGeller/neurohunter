@@ -9,6 +9,33 @@ from pydantic import (
     Field,
 )
 
+from app.schemas.profile_enums import (
+    AmbiguityTolerance,
+    AutonomyLevel,
+    BusinessTripTolerance,
+    ContextSwitchingTolerance,
+    DeadlineTolerance,
+    FeedbackFrequencyPreference,
+    InformationOverloadTolerance,
+    InterruptionsTolerance,
+    MeetingTolerance,
+    NightWorkTolerance,
+    NoiseTolerance,
+    OvertimeTolerance,
+    PhoneCallTolerance,
+    PhysicalActivityTolerance,
+    PreferredManagementStyle,
+    PreferredTaskStructure,
+    PublicSpeakingTolerance,
+    ShiftWorkTolerance,
+    TaskVarietyPreference,
+    WeekendWork,
+)
+from app.schemas.vacancy_enums import (
+    VacancyFrequency,
+    VacancyIntensity,
+)
+
 
 class Vacancy(BaseModel):
     """Vacancy model."""
@@ -49,7 +76,7 @@ class VacancyFeatures(BaseModel):
     # Overtime
 
     overtime_expected: bool | None = None
-    overtime_frequency: str | None = None
+    overtime_frequency: VacancyFrequency | None = None
 
     # Work format
 
@@ -60,34 +87,34 @@ class VacancyFeatures(BaseModel):
 
     # Work restrictions
 
-    night_work: str | None = None
-    shift_work: str | None = None
-    business_trips: str | None = None
-    weekend_work: str | None = None
+    night_work: VacancyFrequency | None = None
+    shift_work: VacancyFrequency | None = None
+    business_trips: VacancyFrequency | None = None
+    weekend_work: WeekendWork | None = None
 
     # Communication
 
     client_communication: bool | None = None
     team_communication: bool | None = None
     customer_facing: bool | None = None
-    communication_frequency: str | None = None
-    meeting_frequency: str | None = None
+    communication_frequency: VacancyFrequency | None = None
+    meeting_frequency: VacancyFrequency | None = None
     phone_calls_required: bool | None = None
-    phone_calls_frequency: str | None = None
+    phone_calls_frequency: VacancyFrequency | None = None
     public_speaking_required: bool | None = None
-    public_speaking_frequency: str | None = None
+    public_speaking_frequency: VacancyFrequency | None = None
     customer_support: bool | None = None
-    conflict_level: str | None = None
+    conflict_level: VacancyIntensity | None = None
 
     # Workload and pressure
 
     multitasking_required: bool | None = None
-    deadline_pressure: str | None = None
-    task_changes_frequency: str | None = None
-    information_load: str | None = None
-    interruptions_frequency: str | None = None
-    context_switching_frequency: str | None = None
-    ambiguity_level: str | None = None
+    deadline_pressure: VacancyIntensity | None = None
+    task_changes_frequency: VacancyFrequency | None = None
+    information_load: VacancyIntensity | None = None
+    interruptions_frequency: VacancyFrequency | None = None
+    context_switching_frequency: VacancyFrequency | None = None
+    ambiguity_level: VacancyIntensity | None = None
 
     # Task structure
 
@@ -95,22 +122,22 @@ class VacancyFeatures(BaseModel):
     task_predictability: str | None = None
     task_independence: str | None = None
     responsibility_level: str | None = None
-    task_structure: str | None = None
-    task_variety: str | None = None
+    task_structure: PreferredTaskStructure | None = None
+    task_variety: TaskVarietyPreference | None = None
 
     # Work environment
 
     team_size: int | None = None
     team_size_known: bool | None = None
-    noise_level: str | None = None
+    noise_level: VacancyIntensity | None = None
     open_space: bool | None = None
-    management_style: str | None = None
-    autonomy_level: str | None = None
-    feedback_frequency: str | None = None
+    management_style: PreferredManagementStyle | None = None
+    autonomy_level: AutonomyLevel | None = None
+    feedback_frequency: VacancyFrequency | None = None
 
     # Physical conditions
 
-    physical_activity_level: str | None = None
+    physical_activity_level: VacancyIntensity | None = None
     standing_required: bool | None = None
 
     # Employment conditions
