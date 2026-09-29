@@ -4,9 +4,6 @@ import uuid
 from datetime import (
     time,
 )
-from typing import (
-    Union,
-)
 
 from fastapi_users.db import (
     SQLAlchemyBaseUserTableUUID,
@@ -75,7 +72,7 @@ class UserFeatures(Base):
 
     Hard constraints: salary, experience_years, education,
     night_work_tolerance, shift_work_tolerance,
-    business_trip_tolerance.
+    business_trip_tolerance, preferred_work_formats.
 
     Attributes:
         user_id: User ID.

@@ -21,7 +21,7 @@ class UserFeatures(BaseModel):
     )
 
     # Parameters used for vacancy matching
-    hard_constraints: list[dict[str, Union[int, float]]] = Field(
+    hard_constraints: list[dict[str, Union[int, float, str]]] = Field(
         default_factory=list,
     )
     preferences: list[str] = Field(
