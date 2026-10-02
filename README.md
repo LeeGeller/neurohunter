@@ -100,7 +100,9 @@ services/analyzer/
 * MongoDB;
 * обработку резюме;
 * LLM-анализ;
-* Celery tasks.
+* Celery tasks.NeuroHunter — журнал разработки
+
+
 
 ---
 
@@ -600,4 +602,4 @@ PostgreSQL
 
 # Т
 
-[**NeuroHunter — журнал разработки**]([https://github.com/NeuroHunter/README.md](https://github.com/LeeGeller/neurohunter/blob/main/docs/DEVELOPMENT.md))
+[**NeuroHunter — журнал разработки**]([https://github.com/LeeGeller/neurohunter/blob/main/docs/DEVELOPMENT.md])
