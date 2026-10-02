@@ -602,4 +602,4 @@ PostgreSQL
 
 # Т
 
-[**NeuroHunter — журнал разработки**]([https://github.com/LeeGeller/neurohunter/blob/main/docs/DEVELOPMENT.md])
+[**NeuroHunter — журнал разработки**](https://github.com/LeeGeller/neurohunter/blob/main/docs/DEVELOPMENT.md)
