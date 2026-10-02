@@ -11,6 +11,7 @@ celery_app = Celery(
     include=[
         'app.api.tasks.user_profile',
         'app.api.tasks.resume',
+        'app.api.tasks.search_vacancies'
     ],
 )
 
