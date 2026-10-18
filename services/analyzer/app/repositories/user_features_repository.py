@@ -5,10 +5,6 @@ from typing import (
     TypedDict,
 )
 
-
-from pydantic import (
-    JsonValue,
-)
 from sqlalchemy import (
     select,
 )
@@ -26,7 +22,7 @@ class UserFeatureSearchResult(TypedDict):
 
     user_id: uuid.UUID
     job_titles: list[str]
-    hard_constraints: list[dict[str, JsonValue]]
+    hard_constraints: list[str]
 
 
 class UserFeatureRepository:
@@ -46,6 +42,5 @@ class UserFeatureRepository:
 
         result = await self.session.execute(statement)
         rows = result.mappings().all()
-        print(rows)
 
         return rows
