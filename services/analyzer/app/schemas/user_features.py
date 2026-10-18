@@ -8,6 +8,7 @@ from typing import (
 from pydantic import (
     BaseModel,
     Field,
+    JsonValue,
 )
 
 
@@ -21,7 +22,7 @@ class UserFeatures(BaseModel):
     )
 
     # Parameters used for vacancy matching
-    hard_constraints: list[dict[str, Union[int, float, str]]] = Field(
+    hard_constraints: list[dict[str, JsonValue]] = Field(
         default_factory=list,
     )
     preferences: list[str] = Field(
