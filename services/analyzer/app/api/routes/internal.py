@@ -14,6 +14,7 @@ from app.database.postgres import (
 )
 from app.repositories.user_features_repository import (
     UserFeatureRepository,
+    UserFeatureSearchResult,
 )
 from app.services.search_user_features import (
     SearchUserFeaturesService,
@@ -36,7 +37,7 @@ def get_search_user_features_service(
 
 
 @router.get(
-    "/job-title-groups",
+    '/job-title-groups',
     status_code=status.HTTP_200_OK,
 )
 async def get_job_title_groups(
@@ -46,6 +47,18 @@ async def get_job_title_groups(
 ) -> dict[str, list[uuid.UUID]]:
     """Get job title groups with corresponding user IDs."""
 
-    user_features = await service.get_user_features()
+    return await service.get_group_user_features_by_job_titles()
 
-    return service.group_user_features_by_job_titles(user_features)
+
+@router.get(
+    '/user-features',
+    status_code=status.HTTP_200_OK,
+)
+async def get_user_features(
+    service: SearchUserFeaturesService = Depends(
+        get_search_user_features_service,
+    ),
+) -> list[UserFeatureSearchResult]:
+    """Get user features for search."""
+
+    return await service.get_user_features()
