@@ -7,17 +7,19 @@ import (
 )
 
 type Config struct {
-	Token            string
-	PostgresHost     string
-	PostgresPort     string
-	PostgresUser     string
-	PostgresPassword string
-	PostgresDB       string
-	AppPort          string
-	MongoDB          string
-	MongoUser        string
-	MongoPassword    string
-	MONGO_URI        string
+	Token             string
+	PostgresHost      string
+	PostgresPort      string
+	PostgresUser      string
+	PostgresPassword  string
+	PostgresDB        string
+	AppPort           string
+	MongoDB           string
+	MongoUser         string
+	MongoPassword     string
+	MONGO_URI         string
+	UserFeaturesURL   string
+	JobTitleGroupsURL string
 }
 
 func LoadConfig() (*Config, error) {
@@ -26,15 +28,17 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return &Config{
-		PostgresHost:     os.Getenv("POSTGRES_HOST"),
-		PostgresPort:     os.Getenv("POSTGRES_PORT"),
-		PostgresUser:     os.Getenv("POSTGRES_USER"),
-		PostgresPassword: os.Getenv("POSTGRES_PASSWORD"),
-		PostgresDB:       os.Getenv("POSTGRES_DB"),
-		AppPort:          os.Getenv("APP_PORT"),
-		MongoDB:          os.Getenv("MONGO_DB"),
-		MongoUser:        os.Getenv("MONGO_USER"),
-		MongoPassword:    os.Getenv("MONGO_PASSWORD"),
-		MONGO_URI:        os.Getenv("MONGO_URI"),
+		PostgresHost:      os.Getenv("POSTGRES_HOST"),
+		PostgresPort:      os.Getenv("POSTGRES_PORT"),
+		PostgresUser:      os.Getenv("POSTGRES_USER"),
+		PostgresPassword:  os.Getenv("POSTGRES_PASSWORD"),
+		PostgresDB:        os.Getenv("POSTGRES_DB"),
+		AppPort:           os.Getenv("APP_PORT"),
+		MongoDB:           os.Getenv("MONGO_DB"),
+		MongoUser:         os.Getenv("MONGO_USER"),
+		MongoPassword:     os.Getenv("MONGO_PASSWORD"),
+		MONGO_URI:         os.Getenv("MONGO_URI"),
+		UserFeaturesURL:   os.Getenv("USER_FEATURES"),
+		JobTitleGroupsURL: os.Getenv("JOB_TITLE_GROUPS"),
 	}, nil
 }
