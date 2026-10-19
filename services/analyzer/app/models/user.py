@@ -20,6 +20,9 @@ from sqlalchemy import (
     Text,
     Time,
 )
+from sqlalchemy.dialects.postgresql import (
+    JSONB,
+)
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -74,7 +77,7 @@ class UserFeatures(Base):
     Attributes:
         user_id: User ID.
         job_titles: List of job titles.
-        hard_constraints: List with str of hard constraints.
+        hard_constraints: Dict with str of hard constraints.
         preferences: List of preferences.
         tolerances: List of tolerances.
         context: List of context.
@@ -97,9 +100,11 @@ class UserFeatures(Base):
     )
 
     # Parameters used for vacancy matching
-    hard_constraints: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
-        default=list,
+    hard_constraints: Mapped[
+        dict[str, int | float | str | list[str] | None]
+    ] = mapped_column(
+        JSONB,
+        default=dict,
     )
     preferences: Mapped[list[str]] = mapped_column(
         ARRAY(String),

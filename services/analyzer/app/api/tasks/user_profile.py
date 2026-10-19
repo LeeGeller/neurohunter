@@ -1,5 +1,8 @@
 import asyncio
 import uuid
+from typing import (
+    TypedDict,
+)
 
 from celery import (
     shared_task,
@@ -24,6 +27,18 @@ from app.models.user import (
     UserFeatures,
     UserProfile,
 )
+
+
+class HardConstraints(TypedDict):
+    """Structured criteria for primary vacancy filtering."""
+
+    salary: int | None
+    experience_years: float | None
+    education: str | None
+    night_work_tolerance: str | None
+    business_trip_tolerance: str | None
+    work_formats: list[str]
+    physical_activity_tolerance: str | None
 
 
 @shared_task
@@ -66,16 +81,32 @@ async def _analyze_user_profile(user_id: uuid.UUID) -> None:
             ),
         )
         old_user_features = old_user_features_result.scalar_one_or_none()
+        hard_constraints = build_hard_constraints(user_profile)
 
         if not old_user_features:
             user_features = UserFeatures(
                 **features,
+                hard_constraints=hard_constraints,
             )
             session.add(user_features)
         else:
-            old_user_features.hard_constraints = features['hard_constraints']
-            old_user_features.preferences = features['preferences']
-            old_user_features.tolerances = features['tolerances']
-            old_user_features.context = features['context']
+            old_user_features.job_titles = features["job_titles"]
+            old_user_features.hard_constraints = hard_constraints
+            old_user_features.preferences = features["preferences"]
+            old_user_features.tolerances = features["tolerances"]
+            old_user_features.context = features["context"]
 
         await session.commit()
+
+
+def build_hard_constraints(profile: UserProfile) -> HardConstraints:
+    """Build structured hard constraints for a user."""
+    return {
+        'salary': profile.salary,
+        'experience_years': profile.experience_years,
+        'education': profile.education,
+        'night_work_tolerance': profile.night_work_tolerance,
+        'business_trip_tolerance': profile.business_trip_tolerance,
+        'work_formats': profile.preferred_work_formats or [],
+        'physical_activity_tolerance': profile.physical_activity_tolerance,
+    }

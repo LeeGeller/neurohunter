@@ -14,7 +14,20 @@ from sqlalchemy.ext.asyncio import (
 
 from app.models.user import (
     UserFeatures,
+    UserProfile,
 )
+
+
+class HardConstraints(TypedDict):
+    """Structured criteria for primary vacancy filtering."""
+
+    salary: int | None
+    experience_years: float | None
+    education: str | None
+    night_work_tolerance: str | None
+    business_trip_tolerance: str | None
+    work_formats: list[str]
+    physical_activity_tolerance: str | None
 
 
 class UserFeatureSearchResult(TypedDict):
@@ -22,7 +35,7 @@ class UserFeatureSearchResult(TypedDict):
 
     user_id: uuid.UUID
     job_titles: list[str]
-    hard_constraints: list[str]
+    hard_constraints: HardConstraints
 
 
 class UserFeatureRepository:
@@ -34,13 +47,42 @@ class UserFeatureRepository:
     async def get_user_features_for_search(self) -> list[UserFeatureSearchResult]:
         """Get user features for search."""
 
-        statement = select(
-            UserFeatures.user_id,
-            UserFeatures.job_titles,
-            UserFeatures.hard_constraints,
+        statement = (
+            select(
+                UserFeatures.user_id,
+                UserFeatures.job_titles,
+                UserProfile.salary,
+                UserProfile.experience_years,
+                UserProfile.education,
+                UserProfile.night_work_tolerance,
+                UserProfile.business_trip_tolerance,
+                UserProfile.preferred_work_formats,
+                UserProfile.physical_activity_tolerance,
+            )
+            .join(
+                UserProfile,
+                UserProfile.user_id == UserFeatures.user_id,
+            )
         )
 
         result = await self.session.execute(statement)
         rows = result.mappings().all()
 
-        return rows
+        return [
+            {
+                "user_id": row["user_id"],
+                "job_titles": row["job_titles"] or [],
+                "hard_constraints": {
+                    "salary": row["salary"],
+                    "experience_years": row["experience_years"],
+                    "education": row["education"],
+                    "night_work_tolerance": row["night_work_tolerance"],
+                    "business_trip_tolerance": row["business_trip_tolerance"],
+                    "work_formats": row["preferred_work_formats"] or [],
+                    "physical_activity_tolerance": (
+                        row["physical_activity_tolerance"]
+                    ),
+                },
+            }
+            for row in rows
+        ]
