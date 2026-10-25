@@ -57,14 +57,20 @@ func NewClient(
 
 func (c *Client) GetUserFeatures(
 	ctx context.Context,
-) ([]models.UserFeature, error) {
+) (map[string]models.UserFeature, error) {
 	var features []models.UserFeature
 
 	if err := c.getJSON(ctx, c.userFeaturesURL, &features); err != nil {
 		return nil, fmt.Errorf("failed to fetch user features: %w", err)
 	}
 
-	return features, nil
+	featuresByID := make(map[string]models.UserFeature, len(features))
+
+	for _, feature := range features {
+		featuresByID[feature.UserID] = feature
+	}
+
+	return featuresByID, nil
 }
 
 func (c *Client) GetJobTitleGroups(

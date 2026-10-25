@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
 	"neurohunter/config"
-	"neurohunter/database"
 	"neurohunter/internal/users"
+	"neurohunter/search"
 )
 
 func main() {
@@ -15,12 +14,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	mongoDB, err := database.ConnectMongoDB(cfg.MONGO_URI)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer mongoDB.Disconnect(context.Background())
 
 	analyzerClient, err := users.NewClient(
 		cfg.UserFeaturesURL,
@@ -30,5 +23,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Fatal(http.ListenAndServe(":"+cfg.AppPort, nil))
+	// Собираем вакансии по всем job_titles.
+	vacancies, err := search.FetchVacanciesHabr(
+		context.Background(),
+		analyzerClient,
+	)
+	if err != nil {
+		log.Printf("Failed to fetch vacancies: %v", err)
+		return
+	}
+
 }

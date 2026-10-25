@@ -5,12 +5,13 @@ import (
 	"log"
 	"strings"
 
+	"neurohunter/internal/filtering"
 	"neurohunter/internal/scraper/habr"
 	"neurohunter/internal/users"
 	"neurohunter/models"
 )
 
-func FetchVacancies(
+func FetchVacanciesHabr(
 	ctx context.Context,
 	analyzerClient *users.Client,
 ) ([]models.Vacancy, error) {
@@ -20,11 +21,16 @@ func FetchVacancies(
 		return nil, err
 	}
 
+	userFeatures, err := analyzerClient.GetUserFeatures(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// Собираем вакансии по всем поисковым запросам.
 	allVacancies := make([]models.Vacancy, 0)
 	seenVacancies := make(map[string]struct{})
 
-	for jobTitle := range jobTitleGroups {
+	for jobTitle, userIDS := range jobTitleGroups {
 		log.Printf("Searching vacancies for %q", jobTitle)
 
 		vacancies, err := habr.FetchHabrVacancies(jobTitle)
@@ -56,9 +62,18 @@ func FetchVacancies(
 			seenVacancies[key] = struct{}{}
 			allVacancies = append(allVacancies, vacancy)
 		}
-	}
 
-	log.Printf("Collected %d unique vacancies", len(allVacancies))
+		for _, userID := range userIDS {
+			userFeature, exists := userFeatures[userID]
+
+			if !exists {
+				log.Printf("User features not found for user ID %s", userID)
+				continue
+			}
+
+			filteredVacancy := filtering.FilterVacanciesByUserFeatures(vacancies, userFeature)
+		}
+	}
 
 	return allVacancies, nil
 }

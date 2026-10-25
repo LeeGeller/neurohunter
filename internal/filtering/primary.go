@@ -5,11 +5,12 @@ import (
 )
 
 func FilterVacanciesByUserFeatures(
-	vacancies []models.Vacancy,
-	userFeatures []models.UserFeature,
-	userIDs []string,
+	vacancy []models.Vacancy,
+	userFeature []models.UserFeature,
 ) []models.Vacancy {
 
-	// TODO: фильтрация по зарплате, локации и формату работы.
-	return vacancies
+	if vacancy.Salary < userFeature.Salary {
+		return nil
+	}
+
 }
