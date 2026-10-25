@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"neurohunter/model"
+	"neurohunter/models"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -39,7 +39,7 @@ func ConnectMongoDB(uri string) (*MongoDB, error) {
 	}, nil
 }
 
-func (db *MongoDB) SaveVacancy(vacancies []model.Vacancy) error {
+func (db *MongoDB) SaveVacancy(vacancies []models.Vacancy) error {
 	for _, vacancy := range vacancies {
 
 		filter := bson.M{

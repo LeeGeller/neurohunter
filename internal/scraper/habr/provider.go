@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"neurohunter/internal/utils"
-	"neurohunter/model"
+	"neurohunter/models"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -48,7 +48,7 @@ func fetchHTML(link string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func FetchHabrVacancies(query string) ([]model.Vacancy, error) {
+func FetchHabrVacancies(query string) ([]models.Vacancy, error) {
 	searchURL := baseURL + "/vacancies?q=" + url.QueryEscape(query)
 
 	body, err := fetchHTML(searchURL)
@@ -76,7 +76,7 @@ func FetchHabrVacancies(query string) ([]model.Vacancy, error) {
 	var (
 		wg       sync.WaitGroup
 		sem      = make(chan struct{}, 25)
-		resultCh = make(chan model.Vacancy)
+		resultCh = make(chan models.Vacancy)
 	)
 
 	for _, link := range vacancyURLs {
@@ -102,7 +102,7 @@ func FetchHabrVacancies(query string) ([]model.Vacancy, error) {
 		close(resultCh)
 	}()
 
-	var vacancies []model.Vacancy
+	var vacancies []models.Vacancy
 
 	for vacancy := range resultCh {
 		vacancies = append(vacancies, vacancy)
@@ -111,16 +111,16 @@ func FetchHabrVacancies(query string) ([]model.Vacancy, error) {
 	return vacancies, nil
 }
 
-func parseVacancy(link string) (model.Vacancy, error) {
+func parseVacancy(link string) (models.Vacancy, error) {
 	body, err := fetchHTML(link)
 	if err != nil {
-		return model.Vacancy{}, err
+		return models.Vacancy{}, err
 	}
 	defer body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return model.Vacancy{}, err
+		return models.Vacancy{}, err
 	}
 
 	vacancyID := utils.ParseVacancyID(link)
@@ -231,7 +231,7 @@ func parseVacancy(link string) (model.Vacancy, error) {
 		}
 	}
 
-	return model.Vacancy{
+	return models.Vacancy{
 		ID:           vacancyID,
 		Title:        title,
 		Company:      company,

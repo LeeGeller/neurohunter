@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"neurohunter/models"
 	"strings"
 	"time"
 )
@@ -56,8 +57,8 @@ func NewClient(
 
 func (c *Client) GetUserFeatures(
 	ctx context.Context,
-) ([]UserFeature, error) {
-	var features []UserFeature
+) ([]models.UserFeature, error) {
+	var features []models.UserFeature
 
 	if err := c.getJSON(ctx, c.userFeaturesURL, &features); err != nil {
 		return nil, fmt.Errorf("failed to fetch user features: %w", err)
@@ -68,8 +69,8 @@ func (c *Client) GetUserFeatures(
 
 func (c *Client) GetJobTitleGroups(
 	ctx context.Context,
-) (JobTitleGroups, error) {
-	var groups JobTitleGroups
+) (models.JobTitleGroups, error) {
+	var groups models.JobTitleGroups
 
 	if err := c.getJSON(ctx, c.jobTitleGroupsURL, &groups); err != nil {
 		return nil, fmt.Errorf(
