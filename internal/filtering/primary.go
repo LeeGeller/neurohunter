@@ -5,12 +5,15 @@ import (
 )
 
 func FilterVacanciesByUserFeatures(
-	vacancy []models.Vacancy,
-	userFeature []models.UserFeature,
-) []models.Vacancy {
+	vacancy models.Vacancy,
+	userFeature models.UserFeature,
+) bool {
+	hardConstraints := userFeature.HardConstraints
 
-	if vacancy.Salary < userFeature.Salary {
-		return nil
+	if hardConstraints.Salary != nil &&
+		*vacancy.SalaryFrom <= *hardConstraints.Salary {
+		return false
 	}
 
+	return true
 }
