@@ -1,5 +1,4 @@
 """User profile enums."""
-
 from enum import (
     Enum,
 )
@@ -350,14 +349,6 @@ class OpenSpaceTolerance(str, Enum):
     LOW = 'Скорее предпочитаю отдельный кабинет'
     MEDIUM = 'Могу работать как в отдельном кабинете, так и в open space'
     HIGH = 'Комфортно работаю в open space'
-
-
-class WorkFormat(str, Enum):
-    """Preferred work format."""
-
-    REMOTE = 'Удалённая работа'
-    HYBRID = 'Гибридная работа'
-    OFFICE = 'Работа в офисе'
 
 
 class PhysicalActivityTolerance(str, Enum):

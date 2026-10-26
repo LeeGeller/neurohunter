@@ -44,7 +44,9 @@ from app.schemas.profile_enums import (
     TeamCommunicationTolerance,
     TravelTolerance,
     WeekendWork,
-    WorkFormat,
+)
+from app.schemas.work_format import (
+    WorkFormatConstraints,
 )
 
 
@@ -56,9 +58,9 @@ class UserProfileCreate(BaseModel):
     """
 
     age: int = Field(
-        default=None,
         ge=14,
         le=100,
+        nullable=False,
     )
     profession: str | None = None
     salary: int | None = Field(
@@ -72,7 +74,7 @@ class UserProfileCreate(BaseModel):
     education: EducationLevel | None = None
 
     # Work preferences and tolerances
-    preferred_work_days_per_week: int | None = Field(
+    preferred_work_days_per_week: float | None = Field(
         default=None,
         ge=1,
         le=7,
@@ -122,95 +124,83 @@ class UserProfileCreate(BaseModel):
     open_space_tolerance: OpenSpaceTolerance | None = None
 
     # Work preferences
-    preferred_work_formats: list[WorkFormat] = []
-
+    work_format_constraints: WorkFormatConstraints = Field(
+        default_factory=WorkFormatConstraints,
+    )
     # Work tolerancesW
     physical_activity_tolerance: PhysicalActivityTolerance | None = None
     standing_work_tolerance: StandingWorkTolerance | None = None
     travel_tolerance: TravelTolerance | None = None
 
     # Work factors
-    motivation_factors: list[MotivationFactor] = []
+    motivation_factors: list[MotivationFactor] = Field(
+        default_factory=list,
+    )
 
     # Work importance
 
-    income_importance: int | None = Field(
+    income_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    stability_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    interesting_tasks_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    professional_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    horizontal_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    vertical_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    autonomy_level_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    flexible_schedule_needed_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+    work_life_balance_importance: int = Field(
         default=None,
         ge=0,
         le=10,
     )
-    stability_importance: int | None = Field(
-        default=None,
+    remote_work_importance: int = Field(
         ge=0,
         le=10,
     )
-    interesting_tasks_importance: int | None = Field(
-        default=None,
+    social_environment_importance: int = Field(
         ge=0,
         le=10,
     )
-    professional_growth_importance: int | None = Field(
-        default=None,
+    recognition_importance: int = Field(
         ge=0,
         le=10,
     )
-    horizontal_growth_importance: int | None = Field(
-        default=None,
+    meaningful_work_importance: int = Field(
         ge=0,
         le=10,
     )
-    vertical_growth_importance: int | None = Field(
-        default=None,
+    variety_importance: int = Field(
         ge=0,
         le=10,
     )
-    autonomy_level_importance: int | None = Field(
-        default=None,
+    creativity_importance: int  = Field(
         ge=0,
         le=10,
     )
-    flexible_schedule_needed_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    work_life_balance_importance: float | int = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    remote_work_importance: float | int = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    social_environment_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    recognition_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    meaningful_work_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    variety_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    creativity_importance: int | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-    dms_importance: int | None = Field(
-        default=None,
+    dms_importance: int = Field(
         ge=0,
         le=10,
     )
@@ -229,7 +219,6 @@ class UserProfileRead(BaseModel):
     user_id: uuid.UUID
 
     age: int = Field(
-        default=None,
         ge=14,
         le=100,
     )
@@ -239,7 +228,7 @@ class UserProfileRead(BaseModel):
     education: EducationLevel | None = None
 
     # Work preferences and tolerances
-    preferred_work_days_per_week: int | None = Field(
+    preferred_work_days_per_week: float | None = Field(
         default=None,
         ge=1,
         le=7,
@@ -289,7 +278,7 @@ class UserProfileRead(BaseModel):
     open_space_tolerance: OpenSpaceTolerance | None = None
 
     # Work preferences
-    preferred_work_formats: list[WorkFormat] = []
+    work_format_constraints: WorkFormatConstraints
 
     # Work tolerancesW
     physical_activity_tolerance: PhysicalActivityTolerance | None = None
@@ -297,87 +286,73 @@ class UserProfileRead(BaseModel):
     travel_tolerance: TravelTolerance | None = None
 
     # Work factors
-    motivation_factors: list[MotivationFactor] = []
+    motivation_factors: list[MotivationFactor] = Field(
+        default_factory=list,
+    )
 
     # Work importance
 
-    income_importance: int | None = Field(
-        default=None,
+    income_importance: int = Field(
         ge=0,
         le=10,
     )
-    stability_importance: int | None = Field(
-        default=None,
+    stability_importance: int = Field(
         ge=0,
         le=10,
     )
-    interesting_tasks_importance: int | None = Field(
-        default=None,
+    interesting_tasks_importance: int = Field(
         ge=0,
         le=10,
     )
-    professional_growth_importance: int | None = Field(
-        default=None,
+    professional_growth_importance: int = Field(
         ge=0,
         le=10,
     )
-    horizontal_growth_importance: int | None = Field(
-        default=None,
+    horizontal_growth_importance: int = Field(
         ge=0,
         le=10,
     )
-    vertical_growth_importance: int | None = Field(
-        default=None,
+    vertical_growth_importance: int = Field(
         ge=0,
         le=10,
     )
-    autonomy_level_importance: int | None = Field(
-        default=None,
+    autonomy_level_importance: int = Field(
         ge=0,
         le=10,
     )
-    flexible_schedule_needed_importance: int | None = Field(
-        default=None,
+    flexible_schedule_needed_importance: int = Field(
         ge=0,
         le=10,
     )
-    work_life_balance_importance: float | int = Field(
-        default=None,
+    work_life_balance_importance: int = Field(
         ge=0,
         le=10,
     )
-    remote_work_importance: float | int = Field(
-        default=None,
+    remote_work_importance: int = Field(
         ge=0,
         le=10,
     )
-    social_environment_importance: int | None = Field(
-        default=None,
+    social_environment_importance: int = Field(
         ge=0,
         le=10,
     )
-    recognition_importance: int | None = Field(
-        default=None,
+    recognition_importance: int = Field(
         ge=0,
         le=10,
     )
-    meaningful_work_importance: int | None = Field(
-        default=None,
+    meaningful_work_importance: int = Field(
         ge=0,
         le=10,
     )
-    variety_importance: int | None = Field(
-        default=None,
+    variety_importance: int = Field(
         ge=0,
         le=10,
     )
-    creativity_importance: int | None = Field(
-        default=None,
+    creativity_importance: int = Field(
         ge=0,
         le=10,
     )
-    dms_importance: int | None = Field(
-        default=None,
+    dms_importance: int = Field(
         ge=0,
         le=10,
     )
@@ -463,7 +438,7 @@ class UserProfileUpdate(BaseModel):
 
     # Work preferences
 
-    preferred_work_formats: list[WorkFormat] | None = None
+    work_format_constraints: WorkFormatConstraints | None = None
 
     # Work tolerances
 
@@ -477,98 +452,83 @@ class UserProfileUpdate(BaseModel):
 
     # Work importance
 
-    income_importance: float | None = Field(
+    income_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    stability_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    interesting_tasks_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    professional_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    horizontal_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    vertical_growth_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    autonomy_level_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    flexible_schedule_needed_importance: int = Field(
+        ge=0,
+        le=10,
+    )
+
+    work_life_balance_importance: int = Field(
         default=None,
         ge=0,
         le=10,
     )
 
-    stability_importance: float | None = Field(
-        default=None,
+    remote_work_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    interesting_tasks_importance: float | None = Field(
-        default=None,
+    social_environment_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    professional_growth_importance: float | None = Field(
-        default=None,
+    recognition_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    horizontal_growth_importance: float | None = Field(
-        default=None,
+    meaningful_work_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    vertical_growth_importance: float | None = Field(
-        default=None,
+    variety_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    autonomy_level_importance: float | None = Field(
-        default=None,
+    creativity_importance: int = Field(
         ge=0,
         le=10,
     )
 
-    flexible_schedule_needed_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    work_life_balance_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    remote_work_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    social_environment_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    recognition_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    meaningful_work_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    variety_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    creativity_importance: float | None = Field(
-        default=None,
-        ge=0,
-        le=10,
-    )
-
-    dms_importance: float | None = Field(
-        default=None,
+    dms_importance: int = Field(
         ge=0,
         le=10,
     )
