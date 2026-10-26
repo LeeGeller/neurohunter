@@ -26,7 +26,6 @@ func FetchVacanciesHabr(
 		return nil, err
 	}
 
-	// Собираем вакансии по всем поисковым запросам.
 	allVacancies := make([]models.Vacancy, 0)
 	seenVacancies := make(map[string]struct{})
 
@@ -54,24 +53,43 @@ func FetchVacanciesHabr(
 				continue
 			}
 
-			// Пропускаем уже найденные вакансии.
+			// Пропускаем дубликаты до фильтрации.
 			if _, exists := seenVacancies[key]; exists {
 				continue
 			}
 
-			seenVacancies[key] = struct{}{}
-			allVacancies = append(allVacancies, vacancy)
-		}
+			// Проверяем вакансию по ограничениям пользователей,
+			// связанным с текущим поисковым тайтлом.
+			matchesAnyUser := false
 
-		for _, userID := range userIDS {
-			userFeature, exists := userFeatures[userID]
+			for _, userID := range userIDS {
+				userFeature, exists := userFeatures[userID]
+				if !exists {
+					log.Printf(
+						"User features not found for user ID %s",
+						userID,
+					)
+					continue
+				}
 
-			if !exists {
-				log.Printf("User features not found for user ID %s", userID)
+				if filtering.FilterVacanciesByUserFeatures(
+					vacancy,
+					userFeature,
+				) {
+					matchesAnyUser = true
+					break
+				}
+			}
+
+			// Если вакансия не подошла ни одному пользователю,
+			// не добавляем её в общий список.
+			if !matchesAnyUser {
 				continue
 			}
 
-			filteredVacancy := filtering.FilterVacanciesByUserFeatures(vacancies, userFeature)
+			// Добавляем вакансию после успешной фильтрации.
+			allVacancies = append(allVacancies, vacancy)
+			seenVacancies[key] = struct{}{}
 		}
 	}
 

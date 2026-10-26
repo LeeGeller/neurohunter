@@ -1,8 +1,5 @@
 import asyncio
 import uuid
-from typing import (
-    TypedDict,
-)
 
 from celery import (
     shared_task,
@@ -27,18 +24,9 @@ from app.models.user import (
     UserFeatures,
     UserProfile,
 )
-
-
-class HardConstraints(TypedDict):
-    """Structured criteria for primary vacancy filtering."""
-
-    salary: int | None
-    experience_years: float | None
-    education: str | None
-    night_work_tolerance: str | None
-    business_trip_tolerance: str | None
-    work_formats: list[str]
-    physical_activity_tolerance: str | None
+from app.repositories.user_features_repository import (
+    HardConstraints,
+)
 
 
 @shared_task
@@ -107,6 +95,6 @@ def build_hard_constraints(profile: UserProfile) -> HardConstraints:
         'education': profile.education,
         'night_work_tolerance': profile.night_work_tolerance,
         'business_trip_tolerance': profile.business_trip_tolerance,
-        'work_formats': profile.preferred_work_formats or [],
+        'work_format_constraints': profile.work_format_constraints,
         'physical_activity_tolerance': profile.physical_activity_tolerance,
     }

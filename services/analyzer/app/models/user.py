@@ -2,7 +2,11 @@
 
 import uuid
 from datetime import (
+    datetime,
     time,
+)
+from typing import (
+    TypedDict,
 )
 
 from fastapi_users.db import (
@@ -23,6 +27,9 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import (
     JSONB,
 )
+from sqlalchemy.ext.mutable import (
+    MutableDict,
+)
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -36,6 +43,19 @@ from app.models.resume import (
     ResumeDocument,
     ResumeFeatures,
 )
+
+
+class WorkFormatConstraints(TypedDict):
+    remote: bool | None
+    office: bool | None
+    hybrid: bool | None
+
+
+DEFAULT_WORK_FORMAT_CONSTRAINTS: WorkFormatConstraints = {
+    "remote": None,
+    "office": None,
+    "hybrid": None,
+}
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
@@ -72,7 +92,7 @@ class UserFeatures(Base):
 
     Hard constraints: salary, experience_years, education,
     night_work_tolerance, shift_work_tolerance,
-    business_trip_tolerance, preferred_work_formats.
+    business_trip_tolerance, work_format_constraints.
 
     Attributes:
         user_id: User ID.
@@ -169,7 +189,7 @@ class UserProfile(Base):
     # Work preferences and tolerances
 
     preferred_work_days_per_week: Mapped[float | None] = mapped_column(
-        Integer,
+        Float,
         nullable=True,
     )
 
@@ -336,12 +356,11 @@ class UserProfile(Base):
     )
 
     # Work preferences
-
-    preferred_work_formats: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+    work_format_constraints: Mapped[WorkFormatConstraints] = mapped_column(
+        MutableDict.as_mutable(JSONB),
         nullable=False,
+        default=lambda: dict(DEFAULT_WORK_FORMAT_CONSTRAINTS),
     )
-
     # Work tolerances
 
     physical_activity_tolerance: Mapped[str | None] = mapped_column(
@@ -364,6 +383,7 @@ class UserProfile(Base):
     motivation_factors: Mapped[list[str]] = mapped_column(
         ARRAY(String),
         nullable=False,
+        default=list,
     )
 
     # Work importance
@@ -461,11 +481,11 @@ class RefreshToken(Base):
         nullable=False,
         unique=True,
     )
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )
-    expires_at: Mapped[DateTime] = mapped_column(
+    expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )

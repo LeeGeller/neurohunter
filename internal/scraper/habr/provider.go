@@ -183,7 +183,6 @@ func parseVacancy(link string) (models.Vacancy, error) {
 
 		// Work format
 		meta.Find(".basic-chip").Each(func(_ int, chip *goquery.Selection) {
-
 			if workFormat != nil {
 				return
 			}
@@ -192,13 +191,11 @@ func parseVacancy(link string) (models.Vacancy, error) {
 				return
 			}
 
-			format := strings.TrimSpace(
+			rawFormat := strings.TrimSpace(
 				chip.Find(".chip-with-icon__text").Text(),
 			)
 
-			if format != "" {
-				workFormat = &format
-			}
+			workFormat = utils.NormalizeWorkFormat(rawFormat)
 		})
 
 		return false

@@ -13,7 +13,6 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
-
 from app.api.tasks.resume import (
     analyze_resume,
 )
