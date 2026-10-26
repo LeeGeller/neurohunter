@@ -55,3 +55,31 @@ func ParseVacancyID(href string) string {
 	parts := strings.Split(strings.TrimRight(href, "/"), "/")
 	return parts[len(parts)-1]
 }
+
+// NormalizeWorkFormat converts a source work format into a stable value.
+func NormalizeWorkFormat(raw string) *string {
+	format := strings.ToLower(strings.TrimSpace(raw))
+	format = strings.ReplaceAll(format, "ё", "е")
+
+	var normalized string
+
+	switch {
+	case strings.Contains(format, "удал"),
+		strings.Contains(format, "дистанц"),
+		strings.Contains(format, "remote"):
+		normalized = "remote"
+
+	case strings.Contains(format, "офис"),
+		strings.Contains(format, "office"):
+		normalized = "office"
+
+	case strings.Contains(format, "гибрид"),
+		strings.Contains(format, "hybrid"):
+		normalized = "hybrid"
+
+	default:
+		return nil
+	}
+
+	return &normalized
+}
