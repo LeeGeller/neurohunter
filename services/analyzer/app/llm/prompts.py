@@ -995,7 +995,7 @@ USER_FEATURES_PROMPT = """
 - education;
 - night_work_tolerance;
 - business_trip_tolerance;
-- preferred_work_formats;
+- work_format_constraints;
 - physical_activity_tolerance.
 
 Эти значения формируют отдельный объект hard_constraints,
@@ -1240,7 +1240,7 @@ feedback_frequency_preference: {feedback_frequency_preference}
 noise_tolerance: {noise_tolerance}
 open_space_tolerance: {open_space_tolerance}
 
-preferred_work_formats: {preferred_work_formats}
+work_format_constraints: {work_format_constraints}
 
 physical_activity_tolerance: {physical_activity_tolerance}
 standing_work_tolerance: {standing_work_tolerance}

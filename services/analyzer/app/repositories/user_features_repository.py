@@ -16,6 +16,9 @@ from app.models.user import (
     UserFeatures,
     UserProfile,
 )
+from app.schemas.work_format import (
+    WorkFormatConstraints,
+)
 
 
 class HardConstraints(TypedDict):
@@ -26,7 +29,7 @@ class HardConstraints(TypedDict):
     education: str | None
     night_work_tolerance: str | None
     business_trip_tolerance: str | None
-    work_formats: list[str]
+    work_format_constraints: WorkFormatConstraints
     physical_activity_tolerance: str | None
 
 
@@ -56,7 +59,7 @@ class UserFeatureRepository:
                 UserProfile.education,
                 UserProfile.night_work_tolerance,
                 UserProfile.business_trip_tolerance,
-                UserProfile.preferred_work_formats,
+                UserProfile.work_format_constraints,
                 UserProfile.physical_activity_tolerance,
             )
             .join(
@@ -78,7 +81,11 @@ class UserFeatureRepository:
                     "education": row["education"],
                     "night_work_tolerance": row["night_work_tolerance"],
                     "business_trip_tolerance": row["business_trip_tolerance"],
-                    "work_formats": row["preferred_work_formats"] or [],
+                    "work_format_constraints": row["work_format_constraints"] or {
+                        "remote": None,
+                        "office": None,
+                        "hybrid": None,
+                    },
                     "physical_activity_tolerance": (
                         row["physical_activity_tolerance"]
                     ),

@@ -92,7 +92,7 @@ class UserFeatures(Base):
 
     Hard constraints: salary, experience_years, education,
     night_work_tolerance, shift_work_tolerance,
-    business_trip_tolerance, preferred_work_formats.
+    business_trip_tolerance, work_format_constraints.
 
     Attributes:
         user_id: User ID.
