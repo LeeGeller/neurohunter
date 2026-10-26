@@ -14,20 +14,21 @@ import (
 func FetchVacanciesHabr(
 	ctx context.Context,
 	analyzerClient *users.Client,
-) ([]models.Vacancy, error) {
+) ([]models.Vacancy, []models.VacancyUser, error) {
 	// Получаем группы профессий из Python Analyzer.
 	jobTitleGroups, err := analyzerClient.GetJobTitleGroups(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	userFeatures, err := analyzerClient.GetUserFeatures(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	allVacancies := make([]models.Vacancy, 0)
 	seenVacancies := make(map[string]struct{})
+	vacancyUser := make([]models.VacancyUser, 0)
 
 	for jobTitle, userIDS := range jobTitleGroups {
 		log.Printf("Searching vacancies for %q", jobTitle)
@@ -93,5 +94,5 @@ func FetchVacanciesHabr(
 		}
 	}
 
-	return allVacancies, nil
+	return allVacancies, vacancyUser, nil
 }

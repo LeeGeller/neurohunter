@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// Собираем вакансии по всем job_titles.
-	vacancies, err := search.FetchVacanciesHabr(
+	vacancies, vacancyUser, err := search.FetchVacanciesHabr(
 		context.Background(),
 		analyzerClient,
 	)
