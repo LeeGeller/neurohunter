@@ -29,8 +29,9 @@ func FetchVacanciesHabr(
 	allVacancies := make([]models.Vacancy, 0)
 	seenVacancies := make(map[string]struct{})
 	vacancyUser := make([]models.VacancyUser, 0)
+	seenVacancyUsers := make(map[string]struct{})
 
-	for jobTitle, userIDS := range jobTitleGroups {
+	for jobTitle, userIDs := range jobTitleGroups {
 		log.Printf("Searching vacancies for %q", jobTitle)
 
 		vacancies, err := habr.FetchHabrVacancies(jobTitle)
@@ -44,9 +45,9 @@ func FetchVacanciesHabr(
 		}
 
 		for _, vacancy := range vacancies {
-			key := strings.TrimSpace(vacancy.ID)
+			vacancyID := strings.TrimSpace(vacancy.ID)
 
-			if key == "" {
+			if vacancyID == "" {
 				log.Printf(
 					"Skipping vacancy without ID: %q",
 					vacancy.Title,
@@ -54,16 +55,11 @@ func FetchVacanciesHabr(
 				continue
 			}
 
-			// Пропускаем дубликаты до фильтрации.
-			if _, exists := seenVacancies[key]; exists {
-				continue
-			}
-
 			// Проверяем вакансию по ограничениям пользователей,
 			// связанным с текущим поисковым тайтлом.
-			matchesAnyUser := false
+			matchedUsers := make([]string, 0)
 
-			for _, userID := range userIDS {
+			for _, userID := range userIDs {
 				userFeature, exists := userFeatures[userID]
 				if !exists {
 					log.Printf(
@@ -77,20 +73,45 @@ func FetchVacanciesHabr(
 					vacancy,
 					userFeature,
 				) {
-					matchesAnyUser = true
-					break
+					matchedUsers = append(matchedUsers, userID)
 				}
 			}
 
 			// Если вакансия не подошла ни одному пользователю,
 			// не добавляем её в общий список.
-			if !matchesAnyUser {
+			if len(matchedUsers) == 0 {
 				continue
 			}
 
-			// Добавляем вакансию после успешной фильтрации.
-			allVacancies = append(allVacancies, vacancy)
-			seenVacancies[key] = struct{}{}
+			// Добавляем вакансию в общий список только один раз.
+			if _, exists := seenVacancies[vacancyID]; !exists {
+				allVacancies = append(allVacancies, vacancy)
+				seenVacancies[vacancyID] = struct{}{}
+			}
+
+			// Формируем связи вакансии со всеми подходящими пользователями.
+			for _, userID := range matchedUsers {
+				userID = strings.TrimSpace(userID)
+				if userID == "" {
+					continue
+				}
+
+				associationKey := vacancyID + ":" + userID
+
+				if _, exists := seenVacancyUsers[associationKey]; exists {
+					continue
+				}
+
+				vacancyUser = append(
+					vacancyUser,
+					models.VacancyUser{
+						VacancyID: vacancyID,
+						UserID:    userID,
+					},
+				)
+
+				seenVacancyUsers[associationKey] = struct{}{}
+			}
 		}
 	}
 
