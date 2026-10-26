@@ -14,20 +14,21 @@ import (
 func FetchVacanciesHabr(
 	ctx context.Context,
 	analyzerClient *users.Client,
-) ([]models.Vacancy, error) {
+) ([]models.Vacancy, []models.VacancyUser, error) {
 	// Получаем группы профессий из Python Analyzer.
 	jobTitleGroups, err := analyzerClient.GetJobTitleGroups(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	userFeatures, err := analyzerClient.GetUserFeatures(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	allVacancies := make([]models.Vacancy, 0)
 	seenVacancies := make(map[string]struct{})
+	vacancyUser := make([]models.VacancyUser, 0)
 
 	for jobTitle, userIDS := range jobTitleGroups {
 		log.Printf("Searching vacancies for %q", jobTitle)
@@ -58,9 +59,7 @@ func FetchVacanciesHabr(
 				continue
 			}
 
-			// Проверяем вакансию по ограничениям пользователей,
-			// связанным с текущим поисковым тайтлом.
-			matchesAnyUser := false
+			matchedUsers := 0
 
 			for _, userID := range userIDS {
 				userFeature, exists := userFeatures[userID]
@@ -72,26 +71,30 @@ func FetchVacanciesHabr(
 					continue
 				}
 
-				if filtering.FilterVacanciesByUserFeatures(
+				// Пропускаем вакансии, не соответствующие ограничениям пользователя.
+				if !filtering.FilterVacanciesByUserFeatures(
 					vacancy,
 					userFeature,
 				) {
-					matchesAnyUser = true
-					break
+					continue
 				}
+
+				matchedUsers++
+
+				vacancyUser = append(
+					vacancyUser,
+					BuildVacancyUser(vacancy.ID, userID),
+				)
 			}
 
-			// Если вакансия не подошла ни одному пользователю,
-			// не добавляем её в общий список.
-			if !matchesAnyUser {
+			if matchedUsers == 0 {
 				continue
 			}
 
-			// Добавляем вакансию после успешной фильтрации.
 			allVacancies = append(allVacancies, vacancy)
 			seenVacancies[key] = struct{}{}
 		}
 	}
 
-	return allVacancies, nil
+	return allVacancies, vacancyUser, nil
 }
