@@ -59,7 +59,9 @@ func FetchVacanciesHabr(
 				continue
 			}
 
-			matchedUsers := 0
+			// Проверяем вакансию по ограничениям пользователей,
+			// связанным с текущим поисковым тайтлом.
+			matchesAnyUser := false
 
 			for _, userID := range userIDS {
 				userFeature, exists := userFeatures[userID]
@@ -71,26 +73,22 @@ func FetchVacanciesHabr(
 					continue
 				}
 
-				// Пропускаем вакансии, не соответствующие ограничениям пользователя.
-				if !filtering.FilterVacanciesByUserFeatures(
+				if filtering.FilterVacanciesByUserFeatures(
 					vacancy,
 					userFeature,
 				) {
-					continue
+					matchesAnyUser = true
+					break
 				}
-
-				matchedUsers++
-
-				vacancyUser = append(
-					vacancyUser,
-					BuildVacancyUser(vacancy.ID, userID),
-				)
 			}
 
-			if matchedUsers == 0 {
+			// Если вакансия не подошла ни одному пользователю,
+			// не добавляем её в общий список.
+			if !matchesAnyUser {
 				continue
 			}
 
+			// Добавляем вакансию после успешной фильтрации.
 			allVacancies = append(allVacancies, vacancy)
 			seenVacancies[key] = struct{}{}
 		}

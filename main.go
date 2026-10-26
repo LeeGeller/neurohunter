@@ -47,10 +47,4 @@ func main() {
 		log.Printf("Failed to save vacancies: %v", err)
 		return
 	}
-
-	// Сохраняем связьVacancyUser в MongoDB.
-	if err := mongoDB.SaveVacancyUser(vacancyUser); err != nil {
-		log.Printf("Failed to save vacancies: %v", err)
-		return
-	}
 }
