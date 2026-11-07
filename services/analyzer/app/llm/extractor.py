@@ -1,4 +1,7 @@
 import json
+from datetime import (
+    time,
+)
 
 from app.llm.client import (
     OllamaClient,
@@ -22,12 +25,9 @@ from app.schemas.profile_enums import (
     ContextSwitchingTolerance,
     DeadlineTolerance,
     FeedbackFrequencyPreference,
-    InformationOverloadTolerance,
-    InterruptionsTolerance,
     MeetingTolerance,
     NightWorkTolerance,
     NoiseTolerance,
-    OvertimeTolerance,
     PhoneCallTolerance,
     PhysicalActivityTolerance,
     PreferredTaskStructure,
@@ -57,9 +57,6 @@ class VacancyFeaturesExtractor:
             salary_to=vacancy.salary_to or "",
             description=vacancy.description,
 
-            overtime_values=", ".join(
-                item.value for item in OvertimeTolerance
-            ),
             night_work_values=", ".join(
                 item.value for item in NightWorkTolerance
             ),
@@ -108,17 +105,22 @@ class VacancyFeaturesExtractor:
             ambiguity_values=", ".join(
                 item.value for item in AmbiguityTolerance
             ),
-            information_load_values=", ".join(
-                item.value for item in InformationOverloadTolerance
-            ),
-            interruptions_values=", ".join(
-                item.value for item in InterruptionsTolerance
-            ),
         )
 
-        response = await self.llm_client.generate(prompt)
+        response = await self.llm_client.generate(
+            prompt,
+        )
 
-        return VacancyFeatures.model_validate_json(response)
+        # Parse JSON response.
+        data = json.loads(response)
+
+        # Convert time strings into datetime.time.
+        for field in ("start_time", "end_time"):
+            if data[field] is not None:
+                data[field] = time.fromisoformat(data[field])
+
+        # Create SQLAlchemy ORM instance.
+        return VacancyFeatures(**data)
 
 
 class ResumeFeaturesExtractor:
