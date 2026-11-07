@@ -3,7 +3,9 @@
 from collections.abc import (
     AsyncGenerator,
 )
-from uuid import UUID
+from uuid import (
+    UUID,
+)
 
 from fastapi import (
     Depends,

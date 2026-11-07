@@ -13,7 +13,7 @@ class VacancyRepository:
     """Vacancy repository."""
 
     def __init__(self, db: AsyncDatabase):
-        self.collection = db["vacancies"]
+        self.collection = db['vacancies']
 
     async def get_all_vacancies(self) -> list[Vacancy]:
         """Get all vacancies from the database."""
@@ -22,7 +22,7 @@ class VacancyRepository:
         cursor = self.collection.find({})
 
         async for vacancy in cursor:
-            vacancy.pop("_id", None)
+            vacancy.pop('_id', None)
             vacancies.append(Vacancy(**vacancy))
 
         return vacancies

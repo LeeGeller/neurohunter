@@ -8,26 +8,29 @@ from pydantic import (
     ConfigDict,
     Field,
 )
+from sqlalchemy import (
+    JSON,
+    Boolean,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
+    Float,
+    Integer,
+    String,
+    Time,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+)
 
+from app.database.base import (
+    Base,
+)
 from app.schemas.profile_enums import (
-    AmbiguityTolerance,
     AutonomyLevel,
-    BusinessTripTolerance,
-    ContextSwitchingTolerance,
-    DeadlineTolerance,
-    FeedbackFrequencyPreference,
-    InformationOverloadTolerance,
-    InterruptionsTolerance,
-    MeetingTolerance,
-    NightWorkTolerance,
-    NoiseTolerance,
-    OvertimeTolerance,
-    PhoneCallTolerance,
-    PhysicalActivityTolerance,
     PreferredManagementStyle,
     PreferredTaskStructure,
-    PublicSpeakingTolerance,
-    ShiftWorkTolerance,
     TaskVarietyPreference,
     WeekendWork,
 )
@@ -46,109 +49,175 @@ class Vacancy(BaseModel):
 
     id: str
     title: str
-    vacancy_date: datetime = Field(alias="vacancydate")
+    vacancy_date: datetime = Field(alias='vacancydate')
     description: str
     company: str
-    work_location: str | None = Field(alias="worklocation")
-    work_format: str | None = Field(alias="workformat")
-    salary_from: int | None = Field(alias="salaryfrom")
-    salary_to: int | None = Field(alias="salaryto")
+    work_location: str | None = Field(alias='worklocation')
+    work_format: str | None = Field(alias='workformat')
+    salary_from: int | None = Field(alias='salaryfrom')
+    salary_to: int | None = Field(alias='salaryto')
     currency: str | None
     url: str
 
 
-class VacancyFeatures(BaseModel):
-
+class VacancyFeatures(Base):
     """Extract job vacancy attributes from the description."""
 
-    vacancy_id: str
+    __tablename__ = 'vacancy_features'
+
+    vacancy_id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+    )
 
     # Work schedule
-
-    work_days_per_week: float | None = None
-    work_hours_per_day: float | None = None
-    weekly_work_hours: float | None = None
-    work_schedule: str | None = None
-    flexible_schedule: bool | None = None
-    start_time: time | None = None
-    end_time: time | None = None
+    work_days_per_week: Mapped[float | None] = mapped_column(Float, nullable=True)
+    work_hours_per_day: Mapped[float | None] = mapped_column(Float, nullable=True)
+    weekly_work_hours: Mapped[float | None] = mapped_column(Float, nullable=True)
+    work_schedule: Mapped[str | None] = mapped_column(String, nullable=True)
+    flexible_schedule: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    start_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    end_time: Mapped[time | None] = mapped_column(Time, nullable=True)
 
     # Overtime
-
-    overtime_expected: bool | None = None
-    overtime_frequency: VacancyFrequency | None = None
+    overtime_expected: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    overtime_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_overtime_frequency", native_enum=False),
+        nullable=True,
+    )
 
     # Work format
-
-    work_format: str | None = None
-    remote_possible: bool | None = None
-    office_required: bool | None = None
-    hybrid_possible: bool | None = None
+    work_format: Mapped[str | None] = mapped_column(String, nullable=True)
+    remote_possible: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    office_required: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    hybrid_possible: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Work restrictions
-
-    night_work: VacancyFrequency | None = None
-    shift_work: VacancyFrequency | None = None
-    business_trips: VacancyFrequency | None = None
-    weekend_work: WeekendWork | None = None
+    night_work: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_night_work", native_enum=False),
+        nullable=True,
+    )
+    shift_work: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_shift_work", native_enum=False),
+        nullable=True,
+    )
+    business_trips: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_business_trips", native_enum=False),
+        nullable=True,
+    )
+    weekend_work: Mapped[WeekendWork | None] = mapped_column(
+        SQLEnum(WeekendWork, name="vacancy_weekend_work", native_enum=False),
+        nullable=True,
+    )
 
     # Communication
-
-    client_communication: bool | None = None
-    team_communication: bool | None = None
-    customer_facing: bool | None = None
-    communication_frequency: VacancyFrequency | None = None
-    meeting_frequency: VacancyFrequency | None = None
-    phone_calls_required: bool | None = None
-    phone_calls_frequency: VacancyFrequency | None = None
-    public_speaking_required: bool | None = None
-    public_speaking_frequency: VacancyFrequency | None = None
-    customer_support: bool | None = None
-    conflict_level: VacancyIntensity | None = None
+    client_communication: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    team_communication: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    customer_facing: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    communication_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_communication_frequency", native_enum=False),
+        nullable=True,
+    )
+    meeting_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_meeting_frequency", native_enum=False),
+        nullable=True,
+    )
+    phone_calls_required: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    phone_calls_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_phone_calls_frequency", native_enum=False),
+        nullable=True,
+    )
+    public_speaking_required: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    public_speaking_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_public_speaking_frequency", native_enum=False),
+        nullable=True,
+    )
+    customer_support: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    conflict_level: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_conflict_level", native_enum=False),
+        nullable=True,
+    )
 
     # Workload and pressure
-
-    multitasking_required: bool | None = None
-    deadline_pressure: VacancyIntensity | None = None
-    task_changes_frequency: VacancyFrequency | None = None
-    information_load: VacancyIntensity | None = None
-    interruptions_frequency: VacancyFrequency | None = None
-    context_switching_frequency: VacancyFrequency | None = None
-    ambiguity_level: VacancyIntensity | None = None
+    multitasking_required: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    deadline_pressure: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_deadline_pressure", native_enum=False),
+        nullable=True,
+    )
+    task_changes_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_task_changes_frequency", native_enum=False),
+        nullable=True,
+    )
+    information_load: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_information_load", native_enum=False),
+        nullable=True,
+    )
+    interruptions_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_interruptions_frequency", native_enum=False),
+        nullable=True,
+    )
+    context_switching_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_context_switching_frequency", native_enum=False),
+        nullable=True,
+    )
+    ambiguity_level: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_ambiguity_level", native_enum=False),
+        nullable=True,
+    )
 
     # Task structure
-
-    task_clarity: str | None = None
-    task_predictability: str | None = None
-    task_independence: str | None = None
-    responsibility_level: str | None = None
-    task_structure: PreferredTaskStructure | None = None
-    task_variety: TaskVarietyPreference | None = None
+    task_clarity: Mapped[str | None] = mapped_column(String, nullable=True)
+    task_predictability: Mapped[str | None] = mapped_column(String, nullable=True)
+    task_independence: Mapped[str | None] = mapped_column(String, nullable=True)
+    responsibility_level: Mapped[str | None] = mapped_column(String, nullable=True)
+    task_structure: Mapped[PreferredTaskStructure | None] = mapped_column(
+        SQLEnum(PreferredTaskStructure, name="vacancy_task_structure", native_enum=False),
+        nullable=True,
+    )
+    task_variety: Mapped[TaskVarietyPreference | None] = mapped_column(
+        SQLEnum(TaskVarietyPreference, name="vacancy_task_variety", native_enum=False),
+        nullable=True,
+    )
 
     # Work environment
-
-    team_size: int | None = None
-    team_size_known: bool | None = None
-    noise_level: VacancyIntensity | None = None
-    open_space: bool | None = None
-    management_style: PreferredManagementStyle | None = None
-    autonomy_level: AutonomyLevel | None = None
-    feedback_frequency: VacancyFrequency | None = None
+    team_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    team_size_known: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    noise_level: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_noise_level", native_enum=False),
+        nullable=True,
+    )
+    open_space: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    management_style: Mapped[PreferredManagementStyle | None] = mapped_column(
+        SQLEnum(PreferredManagementStyle, name="vacancy_management_style", native_enum=False),
+        nullable=True,
+    )
+    autonomy_level: Mapped[AutonomyLevel | None] = mapped_column(
+        SQLEnum(AutonomyLevel, name="vacancy_autonomy_level", native_enum=False),
+        nullable=True,
+    )
+    feedback_frequency: Mapped[VacancyFrequency | None] = mapped_column(
+        SQLEnum(VacancyFrequency, name="vacancy_feedback_frequency", native_enum=False),
+        nullable=True,
+    )
 
     # Physical conditions
-
-    physical_activity_level: VacancyIntensity | None = None
-    standing_required: bool | None = None
+    physical_activity_level: Mapped[VacancyIntensity | None] = mapped_column(
+        SQLEnum(VacancyIntensity, name="vacancy_physical_activity_level", native_enum=False),
+        nullable=True,
+    )
+    standing_required: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Employment conditions
-
-    employment_type: str | None = None
-    probation_period: str | None = None
-    salary_transparency: str | None = None
+    employment_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    probation_period: Mapped[str | None] = mapped_column(String, nullable=True)
+    salary_transparency: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # Evidence extracted from the vacancy description
-
-    evidence: list[str] = []
+    evidence: Mapped[list[str]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=False,
+    )
 
 
 class VacancyMatch(BaseModel):
