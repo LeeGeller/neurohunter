@@ -18,11 +18,11 @@ from app.config.settings import (
 from app.models.user import (
     User,
 )
-from app.services.user_db import (
-    get_user_db,
-)
 from app.services.email import (
     send_verification_email,
+)
+from app.services.user_db import (
+    get_user_db,
 )
 
 
