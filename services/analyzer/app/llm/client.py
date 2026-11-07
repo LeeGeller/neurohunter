@@ -6,22 +6,33 @@ import httpx
 class OllamaClient:
     """Client for interacting with the Ollama LLM API."""
 
-    def __init__(self, base_url: str, model: str) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        response_schema: dict | None = None,
+    ) -> None:
         """Initialize the OllamaClient with the base URL and model name."""
         self.base_url = base_url.rstrip('/')
         self.model = model
         self.client = httpx.AsyncClient()
+        self.response_schema = response_schema
 
-    async def generate(self, prompt: str) -> str:
+    async def generate(
+        self,
+        prompt: str,
+    ) -> str:
         """Generate text using the Ollama LLM API."""
 
         payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,
-            "think": False,
-
+            'model': self.model,
+            'prompt': prompt,
+            'stream': False,
+            'think': False,
         }
+
+        if self.response_schema is not None:
+            payload["format"] = self.response_schema
 
         response = await self.client.post(
             f"{self.base_url}/api/generate",
@@ -30,10 +41,9 @@ class OllamaClient:
         )
 
         response.raise_for_status()
-
         data = response.json()
 
-        return data["response"]
+        return data['response']
 
     async def close(self) -> None:
         """Close the HTTP client."""
