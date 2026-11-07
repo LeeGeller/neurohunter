@@ -10,24 +10,9 @@ from pydantic import (
 )
 
 from app.schemas.profile_enums import (
-    AmbiguityTolerance,
     AutonomyLevel,
-    BusinessTripTolerance,
-    ContextSwitchingTolerance,
-    DeadlineTolerance,
-    FeedbackFrequencyPreference,
-    InformationOverloadTolerance,
-    InterruptionsTolerance,
-    MeetingTolerance,
-    NightWorkTolerance,
-    NoiseTolerance,
-    OvertimeTolerance,
-    PhoneCallTolerance,
-    PhysicalActivityTolerance,
     PreferredManagementStyle,
     PreferredTaskStructure,
-    PublicSpeakingTolerance,
-    ShiftWorkTolerance,
     TaskVarietyPreference,
     WeekendWork,
 )
@@ -46,13 +31,13 @@ class Vacancy(BaseModel):
 
     id: str
     title: str
-    vacancy_date: datetime = Field(alias="vacancydate")
+    vacancy_date: datetime = Field(alias='vacancydate')
     description: str
     company: str
-    work_location: str | None = Field(alias="worklocation")
-    work_format: str | None = Field(alias="workformat")
-    salary_from: int | None = Field(alias="salaryfrom")
-    salary_to: int | None = Field(alias="salaryto")
+    work_location: str | None = Field(alias='worklocation')
+    work_format: str | None = Field(alias='workformat')
+    salary_from: int | None = Field(alias='salaryfrom')
+    salary_to: int | None = Field(alias='salaryto')
     currency: str | None
     url: str
 
