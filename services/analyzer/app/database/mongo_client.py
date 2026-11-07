@@ -1,14 +1,13 @@
 """MongoDB client."""
 
-
 from pymongo import (
     AsyncMongoClient,
 )
-from pymongo.asynchronus.database import (
+from pymongo.asynchronous.database import (
     AsyncDatabase,
 )
 
-from app.config import (
+from app.config.settings import (
     settings,
 )
 
@@ -16,9 +15,9 @@ from app.config import (
 class MongoDBClient:
     """MongoDB connection client."""
 
-    def __init__(self):
-        self.client : AsyncMongoClient | None = None
-        self.db : AsyncDatabase | None = None
+    def __init__(self) -> None:
+        self.client: AsyncMongoClient | None = None
+        self.db: AsyncDatabase | None = None
 
     async def connect(self) -> None:
         """Connect to the MongoDB database."""
@@ -36,6 +35,7 @@ class MongoDBClient:
 
     def get_database(self) -> AsyncDatabase:
         """Get the MongoDB database instance."""
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("MongoDB client is not connected.")
+
         return self.db
