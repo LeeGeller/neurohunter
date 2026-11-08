@@ -202,4 +202,16 @@ class VacancyRequirementsExtractor:
     async def extract_requirements(self, vacancy: Vacancy) -> VacancyRequirements:
         """Extract structured requirements from a vacancy using LLM."""
 
-        prompt = VACANCY_REQUIREMENTS_PROMPT
+        prompt = VACANCY_REQUIREMENTS_PROMPT.format(
+            title=vacancy.title,
+            description=vacancy.description,
+        )
+
+        response = await self.llm_client.generate(
+            prompt,
+            self.response_schema,
+        )
+
+        data = json.loads(response)
+
+        return VacancyRequirements(**data)
