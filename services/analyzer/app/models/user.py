@@ -90,7 +90,7 @@ class UserFeatures(Base):
     This schema is used to store user preferences, hard constraints,
     and tolerances for vacancy matching.
 
-    Hard constraints: salary, education,
+    Hard constraints: salary, experience_years, education,
     night_work_tolerance, shift_work_tolerance,
     business_trip_tolerance, work_format_constraints.
 
@@ -173,6 +173,11 @@ class UserProfile(Base):
 
     salary: Mapped[int | None] = mapped_column(
         Integer,
+        nullable=True,
+    )
+
+    experience_years: Mapped[float | None] = mapped_column(
+        Float,
         nullable=True,
     )
 

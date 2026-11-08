@@ -91,6 +91,7 @@ def build_hard_constraints(profile: UserProfile) -> HardConstraints:
     """Build structured hard constraints for a user."""
     return {
         'salary': profile.salary,
+        'experience_years': profile.experience_years,
         'education': profile.education,
         'night_work_tolerance': profile.night_work_tolerance,
         'business_trip_tolerance': profile.business_trip_tolerance,
