@@ -16,15 +16,16 @@ from app.database.mongo_client import (
 from app.database.postgres import (
     get_session,
 )
-
 from app.llm.client import (
     OllamaClient,
 )
 from app.llm.extractor import (
     VacancyFeaturesExtractor,
+    VacancyRequirementsExtractor,
 )
 from app.models.vacancy import (
     VacancyFeatures,
+    VacancyRequirements,
 )
 from app.repositories.repository_manager import (
     RepositoryManager,
@@ -54,14 +55,12 @@ async def _analyze_vacancies() -> None:
         repositories = RepositoryManager(mongo_client)
         context_service = VacancyContextService(repositories)
 
-        vacancies = await context_service.get_all_vacancy_users()
-
-        all_vacancies = await context_service.get_all_vacancies()
+        vacancies_to_analyze = await context_service.get_vacancies_to_analyze()
 
     finally:
         await mongo_client.disconnect()
 
-    if not vacancies:
+    if not vacancies_to_analyze:
         return
 
     # Initialize extractor
@@ -70,34 +69,84 @@ async def _analyze_vacancies() -> None:
         model=settings.ollama_model,
     )
 
-    extractor = VacancyFeaturesExtractor(
+    extractor_vacancy_feature = VacancyFeaturesExtractor(
         llm_client=llm_model,
         response_schema=build_json_schema(VacancyFeatures),
+    )
+    extractor_vacancy_requirements = VacancyRequirementsExtractor(
+        llm_client=llm_model,
+        response_schema=build_json_schema(VacancyRequirements),
     )
 
     # Initialize PostgreSQL session
     async for session in get_session():
 
-        for vacancy in all_vacancies:
-            # Extract vacancy features using LLM
-            vacancy_feature = await extractor.extract_features(vacancy)
+        for vacancy in vacancies_to_analyze:
 
-            # Check whether features already exist
-            result = await session.execute(
-                select(VacancyFeatures).where(
-                    VacancyFeatures.vacancy_id == vacancy_feature.vacancy_id,
-                ),
-            )
+            try:
+                await process_vacancy_features(
+                    session,
+                    vacancy,
+                    extractor_vacancy_feature,
+                )
+                await process_vacancy_requirements(
+                    session,
+                    vacancy,
+                    extractor_vacancy_requirements,
+                )
 
-            old_vacancy_feature = result.scalar_one_or_none()
+                await session.commit()
 
-            if old_vacancy_feature:
-                # Update existing ORM object
-                for field, value in vacancy_feature.items():
-                    setattr(old_vacancy_feature, field, value)
+            except Exception:
+                await session.rollback()
+                raise
 
-            else:
-                # Create new ORM object
-                session.add(vacancy_feature)
 
-            await session.commit()
+async def process_vacancy_features(
+    session,
+    vacancy,
+    extractor: VacancyFeaturesExtractor,
+) -> None:
+    """Process vacancy features and save them in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyFeatures).where(
+            VacancyFeatures.vacancy_id == vacancy.id,
+        )
+    )
+
+    existing_vacancy_features = result.scalar_one_or_none()
+
+    if existing_vacancy_features:
+        return
+
+    vacancy_features = await extractor.extract_features(
+        vacancy,
+    )
+
+    session.add(vacancy_features)
+
+
+async def process_vacancy_requirements(
+    session,
+    vacancy,
+    extractor: VacancyRequirementsExtractor,
+) -> None:
+    """Process vacancy requirements and save them in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyRequirements).where(
+            VacancyRequirements.vacancy_id == vacancy.id,
+        )
+    )
+
+    existing_vacancy_requirements = result.scalar_one_or_none()
+
+    if existing_vacancy_requirements:
+        return
+
+    vacancy_requirements = await extractor.extract_requirements(
+        vacancy,
+    )
+
+    session.add(vacancy_requirements)

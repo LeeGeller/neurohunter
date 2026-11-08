@@ -23,9 +23,9 @@ class VacancyContextService:
         """Get all vacancy users."""
         return await self.repositories.vacancy_users.get_all_vacancy_users()
 
-    async def get_all_vacancies(self) -> list[Vacancy]:
-        """Get all vacancies."""
-        return await self.repositories.vacancy.get_all_vacancies()
+    async def get_vacancies_to_analyze(self) -> list[Vacancy]:
+        """Get vacancies to analyze."""
+        return await self.repositories.vacancy.get_vacancies_to_analyze()
 
     async def get_vacancy_users_by_vacancy_id(
         self,
