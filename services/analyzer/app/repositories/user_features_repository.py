@@ -54,8 +54,8 @@ class UserFeatureRepository:
             select(
                 UserFeatures.user_id,
                 UserFeatures.job_titles,
+                UserFeatures.experience_years,
                 UserProfile.salary,
-                UserProfile.experience_years,
                 UserProfile.education,
                 UserProfile.night_work_tolerance,
                 UserProfile.business_trip_tolerance,
@@ -71,25 +71,24 @@ class UserFeatureRepository:
         result = await self.session.execute(statement)
         rows = result.mappings().all()
 
-        return [
-            {
-                "user_id": row["user_id"],
-                "job_titles": row["job_titles"] or [],
-                "hard_constraints": {
-                    "salary": row["salary"],
-                    "experience_years": row["experience_years"],
-                    "education": row["education"],
-                    "night_work_tolerance": row["night_work_tolerance"],
-                    "business_trip_tolerance": row["business_trip_tolerance"],
-                    "work_format_constraints": row["work_format_constraints"] or {
-                        "remote": None,
-                        "office": None,
-                        "hybrid": None,
-                    },
-                    "physical_activity_tolerance": (
-                        row["physical_activity_tolerance"]
-                    ),
+    return [
+        {
+            "user_id": row["user_id"],
+            "job_titles": row["job_titles"] or [],
+            "hard_constraints": {
+                "salary": row["salary"],
+                "education": row["education"],
+                "night_work_tolerance": row["night_work_tolerance"],
+                "business_trip_tolerance": row["business_trip_tolerance"],
+                "work_format_constraints": row["work_format_constraints"] or {
+                    "remote": None,
+                    "office": None,
+                    "hybrid": None,
                 },
-            }
-            for row in rows
-        ]
+                "physical_activity_tolerance": (
+                    row["physical_activity_tolerance"]
+                ),
+            },
+        }
+        for row in rows
+    ]

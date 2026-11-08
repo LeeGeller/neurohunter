@@ -15,7 +15,7 @@ class VacancyRepository:
     def __init__(self, db: AsyncDatabase):
         self.collection = db['vacancies']
 
-    async def get_all_vacancies(self) -> list[Vacancy]:
+    async def get_vacancies_to_analyze(self) -> list[Vacancy]:
         """Get all vacancies from the database."""
         vacancies = []
 

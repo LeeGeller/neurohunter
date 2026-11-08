@@ -21,9 +21,12 @@ from app.llm.client import (
 )
 from app.llm.extractor import (
     VacancyFeaturesExtractor,
+    VacancyRequirementsExtractor,
 )
 from app.models.vacancy import (
     VacancyFeatures,
+    VacancyRequirements,
+    VacancyIdentity,
 )
 from app.repositories.repository_manager import (
     RepositoryManager,
@@ -53,50 +56,141 @@ async def _analyze_vacancies() -> None:
         repositories = RepositoryManager(mongo_client)
         context_service = VacancyContextService(repositories)
 
-        vacancies = await context_service.get_all_vacancy_users()
-
-        all_vacancies = await context_service.get_all_vacancies()
+        vacancies_to_analyze = await context_service.get_vacancies_to_analyze()
 
     finally:
         await mongo_client.disconnect()
 
-    if not vacancies:
+    if not vacancies_to_analyze:
         return
 
     # Initialize extractor
     llm_model = OllamaClient(
         base_url=settings.ollama_host,
         model=settings.ollama_model,
-        response_schema=build_json_schema(VacancyFeatures),
     )
 
-    extractor = VacancyFeaturesExtractor(
+    extractor_vacancy_feature = VacancyFeaturesExtractor(
         llm_client=llm_model,
+        response_schema=build_json_schema(VacancyFeatures),
+    )
+    extractor_vacancy_requirements = VacancyRequirementsExtractor(
+        llm_client=llm_model,
+        response_schema=build_json_schema(VacancyRequirements),
     )
 
     # Initialize PostgreSQL session
     async for session in get_session():
 
-        for vacancy in all_vacancies:
-            # Extract vacancy features using LLM
-            vacancy_feature = await extractor.extract_features(vacancy)
+        for vacancy in vacancies_to_analyze:
 
-            # Check whether features already exist
-            result = await session.execute(
-                select(VacancyFeatures).where(
-                    VacancyFeatures.vacancy_id == vacancy_feature.vacancy_id,
-                ),
-            )
+            try:
+                identity = await get_or_create_vacancy_identity(
+                    session,
+                    external_id=vacancy.id,
+                    source=vacancy.source,
+                )
+                vacancy_uuid = identity.vacancy_uuid
 
-            old_vacancy_feature = result.scalar_one_or_none()
+                await process_vacancy_features(
+                    session,
+                    vacancy,
+                    vacancy_uuid,
+                    extractor_vacancy_feature,
+                )
+                await process_vacancy_requirements(
+                    session,
+                    vacancy,
+                    vacancy_uuid,
+                    extractor_vacancy_requirements,
+                )
 
-            if old_vacancy_feature:
-                # Update existing ORM object
-                for field, value in vacancy_feature.items():
-                    setattr(old_vacancy_feature, field, value)
+                await session.commit()
 
-            else:
-                # Create new ORM object
-                session.add(vacancy_feature)
+            except Exception:
+                await session.rollback()
+                raise
 
-            await session.commit()
+
+async def process_vacancy_features(
+    session,
+    vacancy,
+    vacancy_uuid,
+    extractor: VacancyFeaturesExtractor,
+) -> None:
+    """Process vacancy features and save them in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyFeatures).where(
+            VacancyFeatures.vacancy_id == vacancy_uuid,
+        )
+    )
+
+    existing_vacancy_features = result.scalar_one_or_none()
+
+    if existing_vacancy_features:
+        return
+
+    vacancy_features = await extractor.extract_features(
+        vacancy,
+    )
+    vacancy_features.vacancy_id = vacancy_uuid
+
+    session.add(vacancy_features)
+
+
+async def process_vacancy_requirements(
+    session,
+    vacancy,
+    vacancy_uuid,
+    extractor: VacancyRequirementsExtractor,
+) -> None:
+    """Process vacancy requirements and save them in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyRequirements).where(
+            VacancyRequirements.vacancy_id == vacancy_uuid,
+        )
+    )
+
+    existing_vacancy_requirements = result.scalar_one_or_none()
+
+    if existing_vacancy_requirements:
+        return
+
+    vacancy_requirements = await extractor.extract_requirements(
+        vacancy,
+    )
+    vacancy_requirements.vacancy_id = vacancy_uuid
+
+    session.add(vacancy_requirements)
+
+
+async def get_or_create_vacancy_identity(
+    session,
+    external_id: str,
+    source: str,
+) -> VacancyIdentity:
+    """Get or create a VacancyIdentity in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyIdentity).where(
+            VacancyIdentity.external_id == external_id,
+            VacancyIdentity.source == source,
+        )
+    )
+
+    vacancy_identity = result.scalar_one_or_none()
+
+    if vacancy_identity:
+        return vacancy_identity
+
+    vacancy_identity = VacancyIdentity(
+        external_id=external_id,
+        source=source,
+    )
+
+    session.add(vacancy_identity)
+    await session.flush()
+
+    return vacancy_identity

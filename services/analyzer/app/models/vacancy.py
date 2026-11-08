@@ -1,3 +1,5 @@
+from typing import Optional
+import uuid
 from datetime import (
     datetime,
     time,
@@ -10,14 +12,17 @@ from pydantic import (
 )
 from sqlalchemy import (
     JSON,
+    UUID,
     Boolean,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,
+    ForeignKey,
     Integer,
     String,
     Time,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -65,8 +70,8 @@ class VacancyFeatures(Base):
 
     __tablename__ = 'vacancy_features'
 
-    vacancy_id: Mapped[str] = mapped_column(
-        String,
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
     )
 
@@ -220,32 +225,85 @@ class VacancyFeatures(Base):
     )
 
 
-class VacancyMatch(BaseModel):
-    """Personalized vacancy match for a user."""
+class VacancyRequirements(Base):
+    """Vacancy requirements extracted from the description."""
 
-    vacancy_id: str
-    user_id: str
+    __tablename__ = 'vacancy_requirements'
 
-    # Overall profile match
-    profile_match: float
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
 
-    # Professional skills match
-    skills_match: float
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('vacancy_features.vacancy_id'),
+        unique=True,
+        nullable=False,
+    )
 
-    # Experience match
-    experience_match: float
+    # Skills
+    mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
+    preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
 
-    # Work format match
-    work_format_match: float
+    # Professional experience
+    experience_min: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    experience_max: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
 
-    # Personal burnout risk
-    burnout_risk: float
+    # Education
+    education_requirement: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True,
+    )
 
-    # Personal workload risk
-    workload_risk: float
+    # Evidence
+    evidence: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
 
-    # Personal social overload risk
-    social_overload_risk: float
 
-    # Why the vacancy is a good/bad fit
-    explanation: str
+class VacancyIdentity(Base):
+    """Vacancy identity model."""
+
+    __tablename__ = 'vacancy_identity'
+
+    __table_args__ = (
+        UniqueConstraint(
+            "source",
+            "external_id",
+            name="uq_vacancy_identity_source_external_id",
+        ),
+    )
+
+    vacancy_uuid: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    external_id: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )

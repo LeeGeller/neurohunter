@@ -1,5 +1,9 @@
 """Ollama LLM client."""
 
+from typing import (
+    Optional,
+)
+
 import httpx
 
 
@@ -10,17 +14,16 @@ class OllamaClient:
         self,
         base_url: str,
         model: str,
-        response_schema: dict | None = None,
     ) -> None:
         """Initialize the OllamaClient with the base URL and model name."""
         self.base_url = base_url.rstrip('/')
         self.model = model
         self.client = httpx.AsyncClient()
-        self.response_schema = response_schema
 
     async def generate(
         self,
         prompt: str,
+        response_schema: Optional[dict] = None,
     ) -> str:
         """Generate text using the Ollama LLM API."""
 
@@ -31,8 +34,8 @@ class OllamaClient:
             'think': False,
         }
 
-        if self.response_schema is not None:
-            payload["format"] = self.response_schema
+        if response_schema is not None:
+            payload["format"] = response_schema
 
         response = await self.client.post(
             f"{self.base_url}/api/generate",
