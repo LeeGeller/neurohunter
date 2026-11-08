@@ -738,8 +738,6 @@ JSON STRUCTURE
 Верни строго объект следующей структуры:
 
 {{
-  "vacancy_id": "{vacancy_id}",
-
   "work_days_per_week": null,
   "work_hours_per_day": null,
   "weekly_work_hours": null,

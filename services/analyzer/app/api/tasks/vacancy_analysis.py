@@ -26,6 +26,7 @@ from app.llm.extractor import (
 from app.models.vacancy import (
     VacancyFeatures,
     VacancyRequirements,
+    VacancyIdentity,
 )
 from app.repositories.repository_manager import (
     RepositoryManager,
@@ -84,14 +85,23 @@ async def _analyze_vacancies() -> None:
         for vacancy in vacancies_to_analyze:
 
             try:
+                identity = await get_or_create_vacancy_identity(
+                    session,
+                    external_id=vacancy.id,
+                    source=vacancy.source,
+                )
+                vacancy_uuid = identity.vacancy_uuid
+
                 await process_vacancy_features(
                     session,
                     vacancy,
+                    vacancy_uuid,
                     extractor_vacancy_feature,
                 )
                 await process_vacancy_requirements(
                     session,
                     vacancy,
+                    vacancy_uuid,
                     extractor_vacancy_requirements,
                 )
 
@@ -105,13 +115,14 @@ async def _analyze_vacancies() -> None:
 async def process_vacancy_features(
     session,
     vacancy,
+    vacancy_uuid,
     extractor: VacancyFeaturesExtractor,
 ) -> None:
     """Process vacancy features and save them in PostgreSQL."""
 
     result = await session.execute(
         select(VacancyFeatures).where(
-            VacancyFeatures.vacancy_id == vacancy.id,
+            VacancyFeatures.vacancy_id == vacancy_uuid,
         )
     )
 
@@ -123,6 +134,7 @@ async def process_vacancy_features(
     vacancy_features = await extractor.extract_features(
         vacancy,
     )
+    vacancy_features.vacancy_id = vacancy_uuid
 
     session.add(vacancy_features)
 
@@ -130,13 +142,14 @@ async def process_vacancy_features(
 async def process_vacancy_requirements(
     session,
     vacancy,
+    vacancy_uuid,
     extractor: VacancyRequirementsExtractor,
 ) -> None:
     """Process vacancy requirements and save them in PostgreSQL."""
 
     result = await session.execute(
         select(VacancyRequirements).where(
-            VacancyRequirements.vacancy_id == vacancy.id,
+            VacancyRequirements.vacancy_id == vacancy_uuid,
         )
     )
 
@@ -148,5 +161,36 @@ async def process_vacancy_requirements(
     vacancy_requirements = await extractor.extract_requirements(
         vacancy,
     )
+    vacancy_requirements.vacancy_id = vacancy_uuid
 
     session.add(vacancy_requirements)
+
+
+async def get_or_create_vacancy_identity(
+    session,
+    external_id: str,
+    source: str,
+) -> VacancyIdentity:
+    """Get or create a VacancyIdentity in PostgreSQL."""
+
+    result = await session.execute(
+        select(VacancyIdentity).where(
+            VacancyIdentity.external_id == external_id,
+            VacancyIdentity.source == source,
+        )
+    )
+
+    vacancy_identity = result.scalar_one_or_none()
+
+    if vacancy_identity:
+        return vacancy_identity
+
+    vacancy_identity = VacancyIdentity(
+        external_id=external_id,
+        source=source,
+    )
+
+    session.add(vacancy_identity)
+    await session.flush()
+
+    return vacancy_identity

@@ -22,6 +22,7 @@ from sqlalchemy import (
     Integer,
     String,
     Time,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -275,4 +276,34 @@ class VacancyRequirements(Base):
         JSON,
         default=list,
         nullable=True,
+    )
+
+
+class VacancyIdentity(Base):
+    """Vacancy identity model."""
+
+    __tablename__ = 'vacancy_identity'
+
+    __table_args__ = (
+        UniqueConstraint(
+            "source",
+            "external_id",
+            name="uq_vacancy_identity_source_external_id",
+        ),
+    )
+
+    vacancy_uuid: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    external_id: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
     )

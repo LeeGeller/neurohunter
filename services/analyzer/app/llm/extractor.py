@@ -60,7 +60,6 @@ class VacancyFeaturesExtractor:
         """Extract structured features from a vacancy using LLM."""
 
         prompt = VACANCY_FEATURES_PROMPT.format(
-            vacancy_id=vacancy.id,
             title=vacancy.title,
             company=vacancy.company,
             work_location=vacancy.work_location or "",
