@@ -2,6 +2,9 @@ import json
 from datetime import (
     time,
 )
+from typing import (
+    Optional,
+)
 
 from app.llm.client import (
     OllamaClient,
@@ -10,6 +13,7 @@ from app.llm.prompts import (
     RESUME_FEATURES_PROMPT,
     USER_FEATURES_PROMPT,
     VACANCY_FEATURES_PROMPT,
+    VACANCY_REQUIREMENTS_PROMPT,
 )
 from app.models.user import (
     UserProfile,
@@ -17,6 +21,7 @@ from app.models.user import (
 from app.models.vacancy import (
     Vacancy,
     VacancyFeatures,
+    VacancyRequirements,
 )
 from app.schemas.profile_enums import (
     AmbiguityTolerance,
@@ -41,8 +46,15 @@ from app.schemas.profile_enums import (
 class VacancyFeaturesExtractor:
     """Analyze vacancies using LLM."""
 
-    def __init__(self, llm_client: OllamaClient) -> None:
+    def __init__(
+        self,
+        llm_client: OllamaClient,
+        response_schema: Optional[dict] = None,
+    ) -> None:
+        """Initialize the VacancyFeaturesExtractor."""
         self.llm_client = llm_client
+        self.response_schema = response_schema
+
 
     async def extract_features(self, vacancy: Vacancy) -> VacancyFeatures:
         """Extract structured features from a vacancy using LLM."""
@@ -109,6 +121,7 @@ class VacancyFeaturesExtractor:
 
         response = await self.llm_client.generate(
             prompt,
+            self.response_schema,
         )
 
         # Parse JSON response.
@@ -126,8 +139,14 @@ class VacancyFeaturesExtractor:
 class ResumeFeaturesExtractor:
     """Analyze resumes using LLM."""
 
-    def __init__(self, llm_client: OllamaClient) -> None:
+    def __init__(
+        self,
+        llm_client: OllamaClient,
+        response_schema: Optional[dict] = None,
+    ) -> None:
+        """Initialize the ResumeFeaturesExtractor."""
         self.llm_client = llm_client
+        self.response_schema = response_schema
 
     async def extract_features(self, resume: str) -> dict:
         """Extract structured features from a resume using LLM."""
@@ -136,7 +155,10 @@ class ResumeFeaturesExtractor:
             resume_text=resume
         )
 
-        response = await self.llm_client.generate(prompt)
+        response = await self.llm_client.generate(
+            prompt,
+            self.response_schema,
+        )
 
         return json.loads(response)
 
@@ -163,3 +185,21 @@ class UserFeaturesExtractor:
             column.name: getattr(user, column.name)
             for column in user.__table__.columns
         }
+
+
+class VacancyRequirementsExtractor:
+    """Analyze vacancy requirements using LLM."""
+
+    def __init__(
+        self,
+        llm_client: OllamaClient,
+        response_schema: Optional[dict],
+    ) -> None:
+        """Initialize the VacancyRequirementsExtractor."""
+        self.llm_client = llm_client
+        self.response_schema = response_schema
+
+    async def extract_requirements(self, vacancy: Vacancy) -> VacancyRequirements:
+        """Extract structured requirements from a vacancy using LLM."""
+
+        prompt = VACANCY_REQUIREMENTS_PROMPT
