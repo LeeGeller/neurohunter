@@ -991,7 +991,6 @@ USER_FEATURES_PROMPT = """
 значений, уже хранящихся в профиле пользователя:
 
 - salary;
-- experience_years;
 - education;
 - night_work_tolerance;
 - business_trip_tolerance;
@@ -1032,7 +1031,6 @@ USER_FEATURES_PROMPT = """
 
 Учитывай:
 - profession;
-- experience_years;
 - профессиональную специализацию;
 - технологии и направления работы, если они явно указаны в профиле;
 - распространённые варианты названия одной и той же должности;
@@ -1200,7 +1198,6 @@ user_id: {user_id}
 age: {age}
 profession: {profession}
 salary: {salary}
-experience_years: {experience_years}
 education: {education}
 
 preferred_work_days_per_week: {preferred_work_days_per_week}

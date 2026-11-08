@@ -90,7 +90,7 @@ class UserFeatures(Base):
     This schema is used to store user preferences, hard constraints,
     and tolerances for vacancy matching.
 
-    Hard constraints: salary, experience_years, education,
+    Hard constraints: salary, education,
     night_work_tolerance, shift_work_tolerance,
     business_trip_tolerance, work_format_constraints.
 
