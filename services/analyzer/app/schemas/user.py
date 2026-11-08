@@ -67,10 +67,6 @@ class UserProfileCreate(BaseModel):
         default=None,
         ge=0,
     )
-    experience_years: float | None = Field(
-        default=None,
-        ge=0,
-    )
     education: EducationLevel | None = None
 
     # Work preferences and tolerances
@@ -224,7 +220,6 @@ class UserProfileRead(BaseModel):
     )
     profession: str | None = None
     salary: int | None = None
-    experience_years: float | None = None
     education: EducationLevel | None = None
 
     # Work preferences and tolerances
@@ -370,10 +365,6 @@ class UserProfileUpdate(BaseModel):
     age: int | None = None
     profession: str | None = None
     salary: int | None = Field(
-        default=None,
-        ge=0,
-    )
-    experience_years: float | None = Field(
         default=None,
         ge=0,
     )

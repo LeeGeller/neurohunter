@@ -20,14 +20,10 @@ async def lifespan(app: FastAPI):
     try:
         await app.state.mongo.admin.command({'ping': 1})
 
-        print("MongoDB connection established.")
-
         yield
 
     finally:
         await app.state.mongo.close()
-
-        print("MongoDB connection closed.")
 
 
 app = FastAPI(

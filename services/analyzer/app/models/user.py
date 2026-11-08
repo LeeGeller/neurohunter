@@ -176,11 +176,6 @@ class UserProfile(Base):
         nullable=True,
     )
 
-    experience_years: Mapped[float | None] = mapped_column(
-        Float,
-        nullable=True,
-    )
-
     education: Mapped[str | None] = mapped_column(
         String,
         nullable=True,
