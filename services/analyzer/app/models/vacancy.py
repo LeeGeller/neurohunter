@@ -1,3 +1,5 @@
+from typing import Optional
+import uuid
 from datetime import (
     datetime,
     time,
@@ -10,11 +12,13 @@ from pydantic import (
 )
 from sqlalchemy import (
     JSON,
+    UUID,
     Boolean,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,
+    ForeignKey,
     Integer,
     String,
     Time,
@@ -220,32 +224,48 @@ class VacancyFeatures(Base):
     )
 
 
-class VacancyMatch(BaseModel):
-    """Personalized vacancy match for a user."""
+class VacancyRequirements(Base):
+    """Vacancy requirements extracted from the description."""
 
-    vacancy_id: str
-    user_id: str
+    __tablename__ = 'vacancy_requirements'
 
-    # Overall profile match
-    profile_match: float
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('vacancy.id'),
+        primary_key=True,
+    )
 
-    # Professional skills match
-    skills_match: float
+    # Skills
+    mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
+    preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
 
-    # Experience match
-    experience_match: float
+    # Professional experience
+    experience_min: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    experience_max: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
 
-    # Work format match
-    work_format_match: float
+    # Education
+    education_requirement: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True,
+    )
 
-    # Personal burnout risk
-    burnout_risk: float
-
-    # Personal workload risk
-    workload_risk: float
-
-    # Personal social overload risk
-    social_overload_risk: float
-
-    # Why the vacancy is a good/bad fit
-    explanation: str
+    # Evidence
+    evidence: Mapped[Optional[list[str]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
