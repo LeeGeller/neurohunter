@@ -16,6 +16,7 @@ from app.database.mongo_client import (
 from app.database.postgres import (
     get_session,
 )
+
 from app.llm.client import (
     OllamaClient,
 )
@@ -67,11 +68,11 @@ async def _analyze_vacancies() -> None:
     llm_model = OllamaClient(
         base_url=settings.ollama_host,
         model=settings.ollama_model,
-        response_schema=build_json_schema(VacancyFeatures),
     )
 
     extractor = VacancyFeaturesExtractor(
         llm_client=llm_model,
+        response_schema=build_json_schema(VacancyFeatures),
     )
 
     # Initialize PostgreSQL session
