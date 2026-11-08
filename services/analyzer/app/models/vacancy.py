@@ -69,8 +69,8 @@ class VacancyFeatures(Base):
 
     __tablename__ = 'vacancy_features'
 
-    vacancy_id: Mapped[str] = mapped_column(
-        String,
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
     )
 
@@ -229,10 +229,17 @@ class VacancyRequirements(Base):
 
     __tablename__ = 'vacancy_requirements'
 
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
     vacancy_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('vacancy.id'),
-        primary_key=True,
+        ForeignKey('vacancy_features.vacancy_id'),
+        unique=True,
+        nullable=False,
     )
 
     # Skills
