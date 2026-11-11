@@ -1,5 +1,7 @@
 """Resume features schemas."""
-import uuid
+from typing import (
+    Optional,
+)
 
 from pydantic import (
     BaseModel,
@@ -7,12 +9,22 @@ from pydantic import (
 )
 
 
+class ProjectSchema(BaseModel):
+    """ProjectSchema."""
+    name: str
+    description: str
+
+
+class ResumeExperienceSchema(BaseModel):
+    """ResumeExperienceSchema."""
+    job_title: Optional[str]
+    company: Optional[str]
+    period: Optional[str]
+    description: Optional[str]
+
+
 class ResumeFeaturesSchema(BaseModel):
-    """Resume features extracted for LLM."""
-
-    user_id: uuid.UUID
-
-    # Parameters used for vacancy matching
+    """ResumeFeaturesSchema."""
     job_titles: list[str] = Field(
         default_factory=list,
     )
@@ -23,12 +35,11 @@ class ResumeFeaturesSchema(BaseModel):
         default_factory=list,
     )
 
-    experience: float | None = None
+    experience: Optional[float]
 
-    projects: list[str] = Field(
+    projects: list[ProjectSchema] = Field(
         default_factory=list,
     )
-
     weaknesses: list[str] = Field(
         default_factory=list,
     )
@@ -36,6 +47,6 @@ class ResumeFeaturesSchema(BaseModel):
         default_factory=list,
     )
 
-    experience_resume: list[str] = Field(
+    experience_resume: list[ResumeExperienceSchema] = Field(
         default_factory=list,
     )
