@@ -47,6 +47,9 @@ services:
       - "${APP_PORT}:8000"
     networks:
       - neurohunter
+    depends_on:
+      mongo:
+        condition: service_started
 
   api:
     build: ./services/analyzer
@@ -61,6 +64,15 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - neurohunter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   postgres:
     image: postgres:16
@@ -89,6 +101,11 @@ services:
       - "${RABBITMQ_MANAGEMENT_PORT}:15672"
     networks:
       - neurohunter
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   celery:
     build: ./services/analyzer
@@ -103,7 +120,12 @@ services:
     networks:
       - neurohunter
     depends_on:
-      - rabbitmq
+      api:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
 volumes:
   mongo_data:
