@@ -29,10 +29,14 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
+    relationship,
 )
 
 from app.database.base import (
     Base,
+)
+from app.models.professional_fit import (
+    ProfessionalFit,
 )
 from app.schemas.user.profile_enums import (
     AutonomyLevel,
@@ -243,6 +247,12 @@ class VacancyRequirements(Base):
         ForeignKey('vacancy_identity.vacancy_uuid'),
         unique=True,
         nullable=False,
+    )
+
+    professional_fit: Mapped['ProfessionalFit'] = relationship(
+        back_populates='vacancy_requirements',
+        cascade='all, delete-orphan',
+        single_parent=True,
     )
 
     # Skills

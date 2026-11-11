@@ -24,6 +24,9 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
+from app.models.professional_fit import (
+    ProfessionalFit,
+)
 
 if TYPE_CHECKING:
     from app.models.user import (
@@ -73,6 +76,11 @@ class ResumeFeatures(Base):
 
     user: Mapped['User'] = relationship(
         back_populates='resume_features',
+    )
+
+    professional_fit: Mapped['ProfessionalFit'] = relationship(
+        back_populates='resume_feature',
+        cascade='all, delete-orphan',
     )
 
     job_titles: Mapped[list[str]] = mapped_column(
