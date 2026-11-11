@@ -8,17 +8,15 @@ from fastapi_users import (
 from app.models.user import (
     User,
 )
+from app.schemas.user.auth import (
+    UserRead,
+)
 from app.services.auth_backend import (
     auth_backend,
 )
 from app.services.user_manager import (
     get_user_manager,
 )
-from services.analyzer.app.schemas.user.auth import (
-    UserRead,
-)
-
-
 
 fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager,

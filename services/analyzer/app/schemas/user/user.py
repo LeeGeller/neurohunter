@@ -10,7 +10,7 @@ from pydantic import (
     Field,
 )
 
-from services.analyzer.app.schemas.user.profile_enums import (
+from app.schemas.user.profile_enums import (
     AmbiguityTolerance,
     AutonomyLevel,
     BurnoutSensitivity,
@@ -45,7 +45,7 @@ from services.analyzer.app.schemas.user.profile_enums import (
     TravelTolerance,
     WeekendWork,
 )
-from services.analyzer.app.schemas.user.work_format import (
+from app.schemas.user.work_format import (
     WorkFormatConstraints,
 )
 

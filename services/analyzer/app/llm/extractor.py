@@ -40,7 +40,7 @@ from app.schemas.user.profile_enums import (
 from app.schemas.vacancy.vacancy_features import (
     VacancyFeaturesSchema,
 )
-from services.analyzer.app.schemas.vacancy.vacancy_requirements import (
+from app.schemas.vacancy.vacancy_requirements import (
     VacancyRequirementsSchema,
 )
 

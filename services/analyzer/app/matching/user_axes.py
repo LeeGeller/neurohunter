@@ -4,7 +4,7 @@ from typing import (
     Final,
 )
 
-from services.analyzer.app.schemas.user.profile_enums import (
+from app.schemas.user.profile_enums import (
     AmbiguityTolerance,
     AutonomyLevel,
     BurnoutSensitivity,

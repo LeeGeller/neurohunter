@@ -1,8 +1,10 @@
-from typing import Optional
 import uuid
 from datetime import (
     datetime,
     time,
+)
+from typing import (
+    Optional,
 )
 
 from pydantic import (
@@ -32,14 +34,14 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from services.analyzer.app.schemas.user.profile_enums import (
+from app.schemas.user.profile_enums import (
     AutonomyLevel,
     PreferredManagementStyle,
     PreferredTaskStructure,
     TaskVarietyPreference,
     WeekendWork,
 )
-from services.analyzer.app.schemas.vacancy.vacancy_enums import (
+from app.schemas.vacancy.vacancy_enums import (
     VacancyFrequency,
     VacancyIntensity,
 )
