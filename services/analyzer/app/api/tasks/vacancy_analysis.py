@@ -25,17 +25,20 @@ from app.llm.extractor import (
 )
 from app.models.vacancy import (
     VacancyFeatures,
-    VacancyRequirements,
     VacancyIdentity,
+    VacancyRequirements,
 )
 from app.repositories.repository_manager import (
     RepositoryManager,
 )
+from app.schemas.vacancy.vacancy_features import (
+    VacancyFeaturesSchema,
+)
+from app.schemas.vacancy.vacancy_requirements import (
+    VacancyRequirementsSchema,
+)
 from app.services.vacancy_context_service import (
     VacancyContextService,
-)
-from app.utils.json_schema import (
-    build_json_schema,
 )
 
 
@@ -72,11 +75,12 @@ async def _analyze_vacancies() -> None:
 
     extractor_vacancy_feature = VacancyFeaturesExtractor(
         llm_client=llm_model,
-        response_schema=build_json_schema(VacancyFeatures),
+        response_schema=VacancyFeaturesSchema.model_json_schema(),
     )
+
     extractor_vacancy_requirements = VacancyRequirementsExtractor(
         llm_client=llm_model,
-        response_schema=build_json_schema(VacancyRequirements),
+        response_schema=VacancyRequirementsSchema.model_json_schema(),
     )
 
     # Initialize PostgreSQL session
@@ -88,7 +92,7 @@ async def _analyze_vacancies() -> None:
                 identity = await get_or_create_vacancy_identity(
                     session,
                     external_id=vacancy.id,
-                    source=vacancy.source,
+                    source=vacancy.url,
                 )
                 vacancy_uuid = identity.vacancy_uuid
 
@@ -131,10 +135,13 @@ async def process_vacancy_features(
     if existing_vacancy_features:
         return
 
-    vacancy_features = await extractor.extract_features(
+    features_schema = await extractor.extract_features(
         vacancy,
     )
-    vacancy_features.vacancy_id = vacancy_uuid
+    vacancy_features = VacancyFeatures(
+        vacancy_id=vacancy_uuid,
+        **features_schema.model_dump(),
+    )
 
     session.add(vacancy_features)
 
@@ -158,10 +165,13 @@ async def process_vacancy_requirements(
     if existing_vacancy_requirements:
         return
 
-    vacancy_requirements = await extractor.extract_requirements(
+    requirements_schema = await extractor.extract_requirements(
         vacancy,
     )
-    vacancy_requirements.vacancy_id = vacancy_uuid
+    vacancy_requirements = VacancyRequirements(
+        vacancy_id=vacancy_uuid,
+        **requirements_schema.model_dump(),
+    )
 
     session.add(vacancy_requirements)
 

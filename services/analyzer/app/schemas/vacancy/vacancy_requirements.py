@@ -1,7 +1,4 @@
-import uuid
-from datetime import (
-    time,
-)
+"""Vacancy requirements schema."""
 from typing import (
     Optional,
 )
@@ -16,9 +13,10 @@ from pydantic import (
 class VacancyRequirementsSchema(BaseModel):
     """Schema for vacancy requirements extracted from LLM."""
 
-    model_config = ConfigDict(extra="forbid")
-
-    vacancy_id: uuid.UUID
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
     mandatory_skills: Optional[list[str]] = Field(
         alias='mandatorySkills',
@@ -36,6 +34,7 @@ class VacancyRequirementsSchema(BaseModel):
     education_requirement: Optional[str] = Field(
         alias='educationRequirement',
     )
-    evidence: Optional[str] = Field(
+    evidence: Optional[list[str]] = Field(
+        default=None,
         alias='evidence',
     )

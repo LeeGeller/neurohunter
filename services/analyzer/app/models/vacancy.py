@@ -238,7 +238,7 @@ class VacancyRequirements(Base):
 
     vacancy_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('vacancy_features.vacancy_id'),
+        ForeignKey('vacancy_identity.vacancy_uuid'),
         unique=True,
         nullable=False,
     )
@@ -246,12 +246,12 @@ class VacancyRequirements(Base):
     # Skills
     mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
     preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
 
@@ -274,7 +274,7 @@ class VacancyRequirements(Base):
     # Evidence
     evidence: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
 

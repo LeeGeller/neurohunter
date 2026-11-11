@@ -1,7 +1,4 @@
 import json
-from datetime import (
-    time,
-)
 from typing import (
     Optional,
 )
@@ -20,10 +17,9 @@ from app.models.user import (
 )
 from app.models.vacancy import (
     Vacancy,
-    VacancyFeatures,
     VacancyRequirements,
 )
-from services.analyzer.app.schemas.user.profile_enums import (
+from app.schemas.user.profile_enums import (
     AmbiguityTolerance,
     AutonomyLevel,
     BusinessTripTolerance,
@@ -41,6 +37,12 @@ from services.analyzer.app.schemas.user.profile_enums import (
     TaskVarietyPreference,
     WeekendWork,
 )
+from app.schemas.vacancy.vacancy_features import (
+    VacancyFeaturesSchema,
+)
+from services.analyzer.app.schemas.vacancy.vacancy_requirements import (
+    VacancyRequirementsSchema,
+)
 
 
 class VacancyFeaturesExtractor:
@@ -56,7 +58,7 @@ class VacancyFeaturesExtractor:
         self.response_schema = response_schema
 
 
-    async def extract_features(self, vacancy: Vacancy) -> VacancyFeatures:
+    async def extract_features(self, vacancy: Vacancy) -> VacancyFeaturesSchema:
         """Extract structured features from a vacancy using LLM."""
 
         prompt = VACANCY_FEATURES_PROMPT.format(
@@ -123,16 +125,9 @@ class VacancyFeaturesExtractor:
             self.response_schema,
         )
 
-        # Parse JSON response.
-        data = json.loads(response)
+        features = VacancyFeaturesSchema.model_validate_json(response)
 
-        # Convert time strings into datetime.time.
-        for field in ("start_time", "end_time"):
-            if data[field] is not None:
-                data[field] = time.fromisoformat(data[field])
-
-        # Create SQLAlchemy ORM instance.
-        return VacancyFeatures(**data)
+        return features
 
 
 class ResumeFeaturesExtractor:
@@ -198,7 +193,7 @@ class VacancyRequirementsExtractor:
         self.llm_client = llm_client
         self.response_schema = response_schema
 
-    async def extract_requirements(self, vacancy: Vacancy) -> VacancyRequirements:
+    async def extract_requirements(self, vacancy: Vacancy) -> VacancyRequirementsSchema:
         """Extract structured requirements from a vacancy using LLM."""
 
         prompt = VACANCY_REQUIREMENTS_PROMPT.format(
@@ -211,6 +206,6 @@ class VacancyRequirementsExtractor:
             self.response_schema,
         )
 
-        data = json.loads(response)
+        requirement = VacancyRequirementsSchema.model_validate_json(response)
 
-        return VacancyRequirements(**data)
+        return requirement
