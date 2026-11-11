@@ -17,7 +17,6 @@ from app.models.user import (
 )
 from app.models.vacancy import (
     Vacancy,
-    VacancyRequirements,
 )
 from app.schemas.user.profile_enums import (
     AmbiguityTolerance,
@@ -36,6 +35,9 @@ from app.schemas.user.profile_enums import (
     ShiftWorkTolerance,
     TaskVarietyPreference,
     WeekendWork,
+)
+from app.schemas.user.resume_features import (
+    ResumeFeaturesSchema,
 )
 from app.schemas.vacancy.vacancy_features import (
     VacancyFeaturesSchema,
@@ -142,7 +144,7 @@ class ResumeFeaturesExtractor:
         self.llm_client = llm_client
         self.response_schema = response_schema
 
-    async def extract_features(self, resume: str) -> dict:
+    async def extract_features(self, resume: str) -> ResumeFeaturesSchema:
         """Extract structured features from a resume using LLM."""
 
         prompt = RESUME_FEATURES_PROMPT.format(
@@ -154,7 +156,9 @@ class ResumeFeaturesExtractor:
             self.response_schema,
         )
 
-        return json.loads(response)
+        resume_features = ResumeFeaturesSchema.model_validate_json(response)
+
+        return resume_features
 
 
 class UserFeaturesExtractor:

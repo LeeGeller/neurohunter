@@ -70,17 +70,23 @@ async def _analyze_resume(user_id: uuid.UUID) -> None:
         if not old_resume_features:
             resume_features = ResumeFeatures(
                 user_id=user_id,
-                **new_features_resume,
+                **new_features_resume.model_dump(),
             )
             session.add(resume_features)
         else:
-            old_resume_features.job_titles = new_features_resume['job_titles']
-            old_resume_features.hard_skills = new_features_resume['hard_skills']
-            old_resume_features.soft_skills = new_features_resume['soft_skills']
-            old_resume_features.experience = new_features_resume['experience']
-            old_resume_features.projects = new_features_resume['projects']
-            old_resume_features.weaknesses = new_features_resume['weaknesses']
-            old_resume_features.strengths = new_features_resume['strengths']
-            old_resume_features.experience_resume = new_features_resume['experience_resume']
+            old_resume_features.job_titles = new_features_resume.job_titles
+            old_resume_features.hard_skills = new_features_resume.hard_skills
+            old_resume_features.soft_skills = new_features_resume.soft_skills
+            old_resume_features.experience = new_features_resume.experience
+            old_resume_features.projects = [
+                project.model_dump()
+                for project in new_features_resume.projects
+            ]
+            old_resume_features.weaknesses = new_features_resume.weaknesses
+            old_resume_features.strengths = new_features_resume.strengths
+            old_resume_features.experience_resume = [
+                experience.model_dump()
+                for experience in new_features_resume.experience_resume
+            ]
 
         await session.commit()
