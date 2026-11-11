@@ -24,6 +24,9 @@ from app.models.resume import (
     ResumeDocument,
     ResumeFeatures,
 )
+from app.schemas.user.resume_features import (
+    ResumeFeaturesSchema,
+)
 
 
 @shared_task
@@ -56,9 +59,12 @@ async def _analyze_resume(user_id: uuid.UUID) -> None:
         )
         extractor = ResumeFeaturesExtractor(
             llm_client=llm_model,
+            response_schema=ResumeFeaturesSchema.model_json_schema()
         )
 
-        new_features_resume = await extractor.extract_features(resume.text)
+        new_features_resume = await extractor.extract_features(
+            resume.text,
+            )
 
         old_resume_features_result = await session.execute(
             select(ResumeFeatures).where(

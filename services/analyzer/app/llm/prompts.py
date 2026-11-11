@@ -833,7 +833,6 @@ VACANCY TO ANALYZE
 """
 
 
-```python
 RESUME_FEATURES_PROMPT = """
 Ты являешься HR-специалистом и специалистом по структурированному
 анализу профессионального опыта кандидатов.
@@ -1079,7 +1078,6 @@ RESUME_FEATURES_PROMPT = """
 
 {resume_text}
 """
-```
 
 
 USER_FEATURES_PROMPT = """
