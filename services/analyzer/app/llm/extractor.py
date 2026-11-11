@@ -2,6 +2,9 @@ import json
 from typing import (
     Optional,
 )
+from typing import (
+    Optional,
+)
 
 from app.llm.client import (
     OllamaClient,
