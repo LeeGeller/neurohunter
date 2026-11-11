@@ -11,20 +11,23 @@ from pydantic import (
 
 class ProjectSchema(BaseModel):
     """ProjectSchema."""
+
     name: str
     description: str
 
 
 class ResumeExperienceSchema(BaseModel):
     """ResumeExperienceSchema."""
-    job_title: Optional[str]
-    company: Optional[str]
-    period: Optional[str]
-    description: Optional[str]
+
+    job_title: Optional[str] = None
+    company: Optional[str] = None
+    period: Optional[str] = None
+    description: Optional[str] = None
 
 
 class ResumeFeaturesSchema(BaseModel):
     """ResumeFeaturesSchema."""
+
     job_titles: list[str] = Field(
         default_factory=list,
     )
