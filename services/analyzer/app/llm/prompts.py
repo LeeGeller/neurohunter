@@ -808,9 +808,6 @@ JSON STRUCTURE
 VACANCY TO ANALYZE
 --------------------------------------------------
 
-ID вакансии:
-{vacancy_id}
-
 Название:
 {title}
 
@@ -1731,8 +1728,6 @@ JSON STRUCTURE
 Верни строго объект следующей структуры:
 
 {{
-  "vacancy_id": "{vacancy_id}",
-
   "job_titles": [],
 
   "mandatory_skills": [],
