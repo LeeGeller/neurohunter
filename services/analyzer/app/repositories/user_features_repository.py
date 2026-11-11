@@ -16,7 +16,7 @@ from app.models.user import (
     UserFeatures,
     UserProfile,
 )
-from app.schemas.work_format import (
+from services.analyzer.app.schemas.user.work_format import (
     WorkFormatConstraints,
 )
 

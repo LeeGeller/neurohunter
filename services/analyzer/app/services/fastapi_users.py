@@ -14,7 +14,7 @@ from app.services.auth_backend import (
 from app.services.user_manager import (
     get_user_manager,
 )
-from app.schemas.auth import (
+from services.analyzer.app.schemas.user.auth import (
     UserRead,
 )
 

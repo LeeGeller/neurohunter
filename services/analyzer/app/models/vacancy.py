@@ -32,14 +32,14 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.schemas.profile_enums import (
+from services.analyzer.app.schemas.user.profile_enums import (
     AutonomyLevel,
     PreferredManagementStyle,
     PreferredTaskStructure,
     TaskVarietyPreference,
     WeekendWork,
 )
-from app.schemas.vacancy_enums import (
+from services.analyzer.app.schemas.vacancy.vacancy_enums import (
     VacancyFrequency,
     VacancyIntensity,
 )

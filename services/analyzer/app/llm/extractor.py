@@ -23,7 +23,7 @@ from app.models.vacancy import (
     VacancyFeatures,
     VacancyRequirements,
 )
-from app.schemas.profile_enums import (
+from services.analyzer.app.schemas.user.profile_enums import (
     AmbiguityTolerance,
     AutonomyLevel,
     BusinessTripTolerance,

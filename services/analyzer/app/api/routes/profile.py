@@ -29,7 +29,7 @@ from app.models.user import (
     User,
     UserProfile,
 )
-from app.schemas.user import (
+from services.analyzer.app.schemas.user.user import (
     UserProfileCreate,
     UserProfileRead,
     UserProfileUpdate,
