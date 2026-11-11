@@ -179,19 +179,30 @@
 
 # **Следующие шаги**
 
-Сейчас основной этап разработки — **сторона Python: сравнить две структуры и откалибровать их для последующего формирования VacancyMatch.**.
+Сейчас основной этап разработки — **сторона Python: формирование ProfessionalFit.**.
 
 #### Анализ вакансий в Python
 
 **Этап 1. Калибровка анализа**
 - [x] Создание `VacancyIdentity` для хранения строковых id Vacancy из MongoDB и UUID значений `VacancyFeatures` в PostgreSQL.
 - [x] Создание `VacancyRequirements` - необходима для определения признаков профессиональной пригодности.
-- [~] Тестирование анализа моделью вакансий и создание `VacancyFeatures` и `VacancyRequirements` (необходимо создать схему для
+- [x] Тестирование анализа моделью вакансий и создание `VacancyFeatures` и `VacancyRequirements` (необходимо создать схему для
     `VacancyFeatures` и `VacancyRequirements`, чтобы id с UUID не присваивался в процессе анализа и не было создание моделей до отработки задачи Celery).
-- [ ] Создание модели для оценки профессиональной пригодности - `VacancyRequirements` ↔ `ResumeFeatures`.
+- [ ] Создание модели для оценки профессиональной пригодности - `ProfessionalFit`.
+    - [ ] Определить категории для навыков.
+    - [ ] Указать веса для навыков.
+    - [ ] Подсчет для каждого.
+    - [ ] Формирование матрицы.
 - [ ] Создание модели для характеристики рабочей среды - `VacancyFeatures` ↔ `UserProfile`.
 - [ ] Создание модели для оценки совместимости с рабочей средой - `VacancyFeatures` ↔ `UserProfile`.
 - [ ] Создание модели для мотивационной совместимости - `UserProfile` ↔ `VacancyFeatures`.
+    Добавить в `VacancyFeatures`:
+        stability_importance;
+        professional_growth_importance;
+        recognition_importance;
+        meaningful_work_importance;
+        creativity_importance;
+        dms_importance.
 
 **Этап 2. Подробное сопоставление вакансий с пользователями**
 - [x] Перепроверить структуру сопоставления `VacancyFeatures` и `UserFeatures`.

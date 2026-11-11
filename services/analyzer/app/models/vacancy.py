@@ -1,8 +1,10 @@
-from typing import Optional
 import uuid
 from datetime import (
     datetime,
     time,
+)
+from typing import (
+    Optional,
 )
 
 from pydantic import (
@@ -27,19 +29,23 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
+    relationship,
 )
 
 from app.database.base import (
     Base,
 )
-from app.schemas.profile_enums import (
+from app.models.professional_fit import (
+    ProfessionalFit,
+)
+from app.schemas.user.profile_enums import (
     AutonomyLevel,
     PreferredManagementStyle,
     PreferredTaskStructure,
     TaskVarietyPreference,
     WeekendWork,
 )
-from app.schemas.vacancy_enums import (
+from app.schemas.vacancy.vacancy_enums import (
     VacancyFrequency,
     VacancyIntensity,
 )
@@ -238,20 +244,26 @@ class VacancyRequirements(Base):
 
     vacancy_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('vacancy_features.vacancy_id'),
+        ForeignKey('vacancy_identity.vacancy_uuid'),
         unique=True,
         nullable=False,
+    )
+
+    professional_fit: Mapped['ProfessionalFit'] = relationship(
+        back_populates='vacancy_requirements',
+        cascade='all, delete-orphan',
+        single_parent=True,
     )
 
     # Skills
     mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
     preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
 
@@ -274,7 +286,7 @@ class VacancyRequirements(Base):
     # Evidence
     evidence: Mapped[Optional[list[str]]] = mapped_column(
         JSON,
-        default=list,
+        default=None,
         nullable=True,
     )
 

@@ -24,6 +24,9 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
+from app.models.professional_fit import (
+    ProfessionalFit,
+)
 
 if TYPE_CHECKING:
     from app.models.user import (
@@ -70,39 +73,52 @@ class ResumeFeatures(Base):
         ForeignKey('users.id'),
         primary_key=True,
     )
+
     user: Mapped['User'] = relationship(
         back_populates='resume_features',
     )
 
-    job_titles = mapped_column(
+    professional_fit: Mapped['ProfessionalFit'] = relationship(
+        back_populates='resume_feature',
+        cascade='all, delete-orphan',
+    )
+
+    job_titles: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
-    hard_skills = mapped_column(
+
+    hard_skills: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
-    soft_skills = mapped_column(
+
+    soft_skills: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
-    experience = mapped_column(
+
+    experience: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
-    projects = mapped_column(
+
+    projects: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        default=list,
+    )
+
+    weaknesses: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
-    weaknesses = mapped_column(
+
+    strengths: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         default=list,
     )
-    strengths = mapped_column(
-        ARRAY(Text),
-        default=list,
-    )
-    experience_resume = mapped_column(
+
+    experience_resume: Mapped[list[dict]] = mapped_column(
         JSONB,
         default=list,
     )

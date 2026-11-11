@@ -13,6 +13,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
+
 from app.api.tasks.resume import (
     analyze_resume,
 )
@@ -29,7 +30,7 @@ from app.models.user import (
     User,
     UserProfile,
 )
-from app.schemas.user import (
+from app.schemas.user.user import (
     UserProfileCreate,
     UserProfileRead,
     UserProfileUpdate,

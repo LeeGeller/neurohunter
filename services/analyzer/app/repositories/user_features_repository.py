@@ -2,11 +2,16 @@
 
 import uuid
 from typing import (
+    Optional,
     TypedDict,
+    cast,
 )
 
 from sqlalchemy import (
     select,
+)
+from sqlalchemy.engine import (
+    RowMapping,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -16,21 +21,26 @@ from app.models.user import (
     UserFeatures,
     UserProfile,
 )
-from app.schemas.work_format import (
-    WorkFormatConstraints,
-)
+
+
+class WorkFormatConstraints(TypedDict):
+    """Hard constraints for work formats."""
+
+    remote: Optional[bool]
+    office: Optional[bool]
+    hybrid: Optional[bool]
 
 
 class HardConstraints(TypedDict):
     """Structured criteria for primary vacancy filtering."""
 
-    salary: int | None
-    experience_years: float | None
-    education: str | None
-    night_work_tolerance: str | None
-    business_trip_tolerance: str | None
+    salary: Optional[int]
+    experience_years: Optional[float]
+    education: Optional[str]
+    night_work_tolerance: Optional[str]
+    business_trip_tolerance: Optional[str]
     work_format_constraints: WorkFormatConstraints
-    physical_activity_tolerance: str | None
+    physical_activity_tolerance: Optional[str]
 
 
 class UserFeatureSearchResult(TypedDict):
@@ -48,7 +58,7 @@ class UserFeatureRepository:
         self.session = session
 
     async def get_user_features_for_search(self) -> list[UserFeatureSearchResult]:
-        """Get user features for search."""
+        """Get user features."""
 
         statement = (
             select(
@@ -57,6 +67,7 @@ class UserFeatureRepository:
                 UserFeatures.experience_years,
                 UserProfile.salary,
                 UserProfile.education,
+                UserProfile.experience_years,
                 UserProfile.night_work_tolerance,
                 UserProfile.business_trip_tolerance,
                 UserProfile.work_format_constraints,
@@ -69,26 +80,21 @@ class UserFeatureRepository:
         )
 
         result = await self.session.execute(statement)
-        rows = result.mappings().all()
+        rows = cast(list[RowMapping], result.mappings().all())
 
-    return [
-        {
-            "user_id": row["user_id"],
-            "job_titles": row["job_titles"] or [],
-            "hard_constraints": {
-                "salary": row["salary"],
-                "education": row["education"],
-                "night_work_tolerance": row["night_work_tolerance"],
-                "business_trip_tolerance": row["business_trip_tolerance"],
-                "work_format_constraints": row["work_format_constraints"] or {
-                    "remote": None,
-                    "office": None,
-                    "hybrid": None,
-                },
-                "physical_activity_tolerance": (
-                    row["physical_activity_tolerance"]
+        return [
+            UserFeatureSearchResult(
+                user_id=row['user_id'],
+                job_titles=row['job_titles'] or [],
+                hard_constraints=HardConstraints(
+                    salary=row['salary'],
+                    experience_years=row['experience_years'],
+                    education=row['education'],
+                    night_work_tolerance=row['night_work_tolerance'],
+                    business_trip_tolerance=row['business_trip_tolerance'],
+                    work_format_constraints=row['work_format_constraints'],
+                    physical_activity_tolerance=row['physical_activity_tolerance'],
                 ),
-            },
-        }
-        for row in rows
-    ]
+            )
+            for row in rows
+        ]

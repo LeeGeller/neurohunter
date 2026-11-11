@@ -27,7 +27,7 @@ from app.models.user import (
     RefreshToken,
     User,
 )
-from app.schemas.auth import (
+from app.schemas.user.auth import (
     TokenResponse,
     UserCreate,
     UserRead,
