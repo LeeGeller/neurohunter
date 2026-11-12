@@ -64,7 +64,7 @@ class UserFeatureRepository:
             select(
                 UserFeatures.user_id,
                 UserFeatures.job_titles,
-                UserFeatures.experience_years,
+                UserProfile.experience_years,
                 UserProfile.salary,
                 UserProfile.education,
                 UserProfile.experience_years,
