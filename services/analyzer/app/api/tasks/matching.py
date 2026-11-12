@@ -59,8 +59,8 @@ async def _match():
     finally:
         await mongo_client.disconnect()
 
-
     async for session in get_session():
+
         # Initialize MandatorySkillsMatcher
         mandatory_skills_matcher = MandatorySkillsMatcher(session=session)
 
