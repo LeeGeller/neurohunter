@@ -2,13 +2,13 @@
 
 
 import uuid
+from typing import (
+    TYPE_CHECKING,
+)
 
 from sqlalchemy import (
-    ARRAY,
     UUID,
-    Float,
     ForeignKey,
-    Text,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -19,12 +19,14 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.resume import (
-    ResumeFeatures,
-)
-from app.models.vacancy import (
-    VacancyRequirements,
-)
+
+if TYPE_CHECKING:
+    from app.models.resume import (
+        ResumeFeatures,
+    )
+    from app.models.vacancy import (
+        VacancyRequirements,
+    )
 
 
 class ProfessionalFit(Base):
@@ -59,4 +61,5 @@ class ProfessionalFit(Base):
     )
 
     # Semantic link
-    hard_skills: Mapped[list[str]]
+    # match_for_mandatory_skills
+

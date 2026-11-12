@@ -15,18 +15,12 @@ from sqlalchemy.ext.asyncio import (
     async_engine_from_config,
 )
 
+import app.models
 from app.config.settings import (
     settings,
 )
 from app.database.base import (
     Base,
-)
-
-from app.models.user import (
-    User,
-)
-from app.models.vacancy import (
-    VacancyFeatures,
 )
 
 # this is the Alembic Config object, which provides

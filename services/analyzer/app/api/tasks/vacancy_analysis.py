@@ -57,7 +57,10 @@ async def _analyze_vacancies() -> None:
 
     try:
         repositories = RepositoryManager(mongo_client)
-        context_service = VacancyContextService(repositories)
+        context_service = VacancyContextService(
+            repositories.vacancy,
+            repositories.vacancy_users,
+        )
 
         vacancies_to_analyze = await context_service.get_vacancies_to_analyze()
 

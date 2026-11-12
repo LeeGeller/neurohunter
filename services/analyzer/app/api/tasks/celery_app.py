@@ -11,6 +11,7 @@ celery_app = Celery(
         'app.api.tasks.user_profile',
         'app.api.tasks.resume',
         'app.api.tasks.vacancy_analysis',
+        'app.api.tasks.matching',
     ],
 )
 

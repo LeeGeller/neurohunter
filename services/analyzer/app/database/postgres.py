@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import (
     NullPool,
 )
+
+import app.models
 from app.config.settings import (
     settings,
 )

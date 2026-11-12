@@ -5,38 +5,73 @@ from app.models.vacancy import (
 from app.models.vacancy_users import (
     VacancyUsers,
 )
-from app.repositories.repository_manager import (
-    RepositoryManager,
+from app.repositories.vacancy_repository import (
+    VacancyRepository,
+)
+from app.repositories.vacancy_users_repository import (
+    VacancyUsersRepository,
 )
 
 
 class VacancyContextService:
-    """Vacancy Context Service.
+    """Facade for accessing vacancies and vacancy-user relationships."""
 
-    This service provides methods to interact with the vacancy context.
-    """
-
-    def __init__(self, repositories: RepositoryManager):
-        self.repositories = repositories
-
-    async def get_all_vacancy_users(self) -> list[VacancyUsers]:
-        """Get all vacancy users."""
-        return await self.repositories.vacancy_users.get_all_vacancy_users()
+    def __init__(self,
+        vacancy_repository: VacancyRepository,
+        vacancy_users_repository: VacancyUsersRepository,
+    ):
+        self.vacancy = vacancy_repository
+        self.vacancy_users = vacancy_users_repository
 
     async def get_vacancies_to_analyze(self) -> list[Vacancy]:
-        """Get vacancies to analyze."""
-        return await self.repositories.vacancy.get_vacancies_to_analyze()
+        """Get all vacancies available for analysis."""
+
+        return await self.vacancy.get_vacancies_to_analyze()
+
+    async def get_vacancies_by_ids(
+        self,
+        vacancy_ids: list[str],
+    ) -> list[Vacancy]:
+        """Get vacancies by their IDs."""
+
+        return await self.vacancy.get_vacancies_by_ids(vacancy_ids)
+
+    async def get_all_vacancy_users(self) -> list[VacancyUsers]:
+        """Get all vacancy-user relationships."""
+
+        return await self.vacancy_users.get_all_vacancy_users()
 
     async def get_vacancy_users_by_vacancy_id(
         self,
-        vacancy_id: str
+        vacancy_id: str,
     ) -> list[VacancyUsers]:
-        """Get vacancy users by vacancy ID."""
-        return await self.repositories.vacancy_users.get_vacancy_users_by_vacancy_id(vacancy_id)
+        """Get users associated with a vacancy."""
+
+        return await self.vacancy_users.get_vacancy_users_by_vacancy_id(
+            vacancy_id,
+        )
 
     async def get_vacancy_users_by_user_id(
         self,
-        user_id: str
+        user_id: str,
     ) -> list[VacancyUsers]:
-        """Get vacancy users by user ID."""
-        return await self.repositories.vacancy_users.get_vacancy_users_by_user_id(user_id)
+        """Get vacancies associated with a user."""
+
+        return await self.vacancy_users.get_vacancy_users_by_user_id(
+            user_id,
+        )
+
+    async def get_vacancies_by_user_id(
+        self,
+        user_id: str,
+    ) -> list[Vacancy]:
+        """Get vacancies associated with a user."""
+
+        vacancy_users = await self.get_vacancy_users_by_user_id(user_id)
+
+        vacancy_ids = [
+            vacancy_user.vacancy_id
+            for vacancy_user in vacancy_users
+        ]
+
+        return await self.get_vacancies_by_ids(vacancy_ids)
