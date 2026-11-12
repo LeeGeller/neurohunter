@@ -7,6 +7,9 @@ from typing import (
 from celery import (
     shared_task,
 )
+from sqlalchemy import (
+    select,
+)
 
 from app.database.mongo_client import (
     MongoDBClient,
@@ -17,8 +20,8 @@ from app.database.postgres import (
 from app.matching_service.mandatory_skills_matcher import (
     MandatorySkillsMatcher,
 )
-from app.models.vacancy_users import (
-    VacancyUsers,
+from app.models.vacancy import (
+    VacancyIdentity,
 )
 from app.repositories.repository_manager import (
     RepositoryManager,
@@ -66,11 +69,20 @@ async def _match():
             resume_features = await mandatory_skills_matcher.get_resume_features(
                 user_id=uuid.UUID(vacancy_user.user_id),
             )
+
+
+            vacancy_identity = await session.execute(
+                select(
+                    VacancyIdentity.vacancy_uuid
+                ).where(
+                    VacancyIdentity.external_id == vacancy_user.vacancy_id,
+                )
+            )
+            vacancy_id = vacancy_identity.scalar_one_or_none()
+
             vacancy_requirements = await mandatory_skills_matcher.get_vacancy_requirements(
-                vacancy_id=uuid.UUID(vacancy_user.vacancy_id)
+                vacancy_id=vacancy_id,
             )
 
             print(resume_features)
             print(vacancy_requirements)
-
-
