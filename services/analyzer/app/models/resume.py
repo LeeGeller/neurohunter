@@ -24,11 +24,11 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.professional_fit import (
-    ProfessionalFit,
-)
 
 if TYPE_CHECKING:
+    from app.models.professional_fit import (
+        ProfessionalFit,
+    )
     from app.models.user import (
         User,
     )

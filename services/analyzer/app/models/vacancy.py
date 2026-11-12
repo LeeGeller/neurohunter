@@ -4,6 +4,7 @@ from datetime import (
     time,
 )
 from typing import (
+    TYPE_CHECKING,
     Optional,
 )
 
@@ -35,9 +36,6 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.professional_fit import (
-    ProfessionalFit,
-)
 from app.schemas.user.profile_enums import (
     AutonomyLevel,
     PreferredManagementStyle,
@@ -49,6 +47,11 @@ from app.schemas.vacancy.vacancy_enums import (
     VacancyFrequency,
     VacancyIntensity,
 )
+
+if TYPE_CHECKING:
+    from app.models.professional_fit import (
+        ProfessionalFit,
+    )
 
 
 class Vacancy(BaseModel):
