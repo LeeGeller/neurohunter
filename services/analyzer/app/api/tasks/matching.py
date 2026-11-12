@@ -70,7 +70,6 @@ async def _match():
                 user_id=uuid.UUID(vacancy_user.user_id),
             )
 
-
             vacancy_identity = await session.execute(
                 select(
                     VacancyIdentity.vacancy_uuid
@@ -84,5 +83,16 @@ async def _match():
                 vacancy_id=vacancy_id,
             )
 
-            print(resume_features)
-            print(vacancy_requirements)
+            if resume_features and vacancy_requirements:
+                print('MANDATORY:', vacancy_requirements.mandatory_skills)
+                print('RESUME:', resume_features.hard_skills)
+                mandatory_skills_matcher.build_skills_matrix(
+                    vacancy_requirements.mandatory_skills,
+                    resume_features.hard_skills,
+                )
+                mandatory_skills_matcher.calculate_skill_matches()
+                coverage = mandatory_skills_matcher.calculate_coverage()
+
+                print(mandatory_skills_matcher.matrix)
+                print(mandatory_skills_matcher.skill_matches)
+                print(coverage)
