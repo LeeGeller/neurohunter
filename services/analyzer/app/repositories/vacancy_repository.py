@@ -26,3 +26,23 @@ class VacancyRepository:
             vacancies.append(Vacancy(**vacancy))
 
         return vacancies
+
+    async def get_vacancies_by_ids(
+        self,
+        vacancy_ids: list[str],
+    ) -> list[Vacancy]:
+        """Get vacancies by IDs."""
+
+        vacancies = []
+
+        cursor = self.collection.find({
+            'vacancy_id': {
+                '$in': vacancy_ids,
+            },
+        })
+
+        async for vacancy in cursor:
+            vacancy.pop('_id', None)
+            vacancies.append(Vacancy(**vacancy))
+
+        return vacancies

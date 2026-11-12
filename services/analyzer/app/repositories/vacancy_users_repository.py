@@ -16,7 +16,20 @@ class VacancyUsersRepository:
         self.collection = db['vacancy_users']
 
     async def get_all_vacancy_users(self) -> list[VacancyUsers]:
-        """Get all vacancy users from the database."""
+        """Get all vacancy users from the database.
+
+        Return:
+            [
+                {
+                    "vacancy_id": "vacancy_123",
+                    "user_id": "user_1"
+                },
+                {
+                    "vacancy_id": "vacancy_456",
+                    "user_id": "user_2"
+                }
+            ]
+    """
         vacancy_users = []
 
         cursor = self.collection.find({})
@@ -29,7 +42,20 @@ class VacancyUsersRepository:
 
 
     async def get_vacancy_users_by_vacancy_id(self, vacancy_id: str) -> list[VacancyUsers]:
-        """Get vacancy users by vacancy ID from the database."""
+        """Get vacancy users by vacancy ID from the database.
+
+        Return:
+            [
+                {
+                    "vacancy_id": "vacancy_123",
+                    "user_id": "user_1"
+                },
+                {
+                    "vacancy_id": "vacancy_123",
+                    "user_id": "user_2"
+                },
+            ]
+        """
         vacancy_users = []
 
         cursor = self.collection.find({"vacancy_id": vacancy_id})
@@ -41,7 +67,20 @@ class VacancyUsersRepository:
         return vacancy_users
 
     async def get_vacancy_users_by_user_id(self, user_id: str) -> list[VacancyUsers]:
-        """Get vacancy users by user ID from the database."""
+        """Get vacancy users by user ID from the database.
+
+        Return:
+            [
+                {
+                    "vacancy_id": "vacancy_123",
+                    "user_id": "user_1"
+                },
+                {
+                    "vacancy_id": "vacancy_456",
+                    "user_id": "user_1"
+                },
+            ]
+        """
         vacancy_users = []
 
         cursor = self.collection.find({"user_id": user_id})
