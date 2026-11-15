@@ -1,4 +1,4 @@
-"""ResumeFeatures extractor."""
+"""ResumeFeatures extractor using LLM."""
 
 from app.llm.client import (
     OllamaClient,

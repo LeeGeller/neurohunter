@@ -1,6 +1,4 @@
-from typing import (
-    Optional,
-)
+"""VacancyRequirements extractor using LLM."""
 
 from app.llm.client import (
     OllamaClient,
@@ -29,6 +27,7 @@ class VacancyRequirementsExtractor(
         llm_client: OllamaClient,
     ) -> None:
         """Initialize the VacancyRequirementsExtractor."""
+
         super().__init__(
             llm_client=llm_client,
             response_model=VacancyRequirementsSchema,

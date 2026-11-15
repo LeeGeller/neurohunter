@@ -41,7 +41,10 @@ from app.services.vacancy_context_service import (
 @shared_task
 def analyze_vacancies_task() -> None:
     """Celery task to analyze vacancies."""
-    asyncio.run(_analyze_vacancies())
+
+    asyncio.run(
+        _analyze_vacancies()
+    )
 
 
 async def _analyze_vacancies() -> None:

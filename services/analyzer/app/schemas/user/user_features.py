@@ -11,8 +11,6 @@ from pydantic import (
 class UserFeaturesSchema(BaseModel):
     """User features model for LLM."""
 
-    user_id: uuid.UUID
-
     job_titles: list[str] = Field(
         default_factory=list,
     )

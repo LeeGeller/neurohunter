@@ -17,7 +17,7 @@ from app.llm.client import (
     OllamaClient,
 )
 
-T = TypeVar('T')
+T = TypeVar('T', bound=BaseModel)
 
 
 class BaseExtractor(Generic[T]):

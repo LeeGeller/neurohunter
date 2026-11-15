@@ -36,9 +36,13 @@ class UserFeaturesExtractor(
 
         return await self.generate(prompt=prompt)
 
-    def profile_to_dict(self, user: UserProfile) -> dict:
+    @staticmethod
+    def profile_to_dict(
+        user: UserProfile,
+    ) -> dict:
         """Convert UserProfile object to dictionary."""
         return {
             column.name: getattr(user, column.name)
             for column in user.__table__.columns
+            if column.name != 'user_id'
         }
