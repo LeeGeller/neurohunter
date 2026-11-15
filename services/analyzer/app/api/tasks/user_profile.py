@@ -17,7 +17,7 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
-from app.llm.extractor import (
+from app.llm.extractors.user.user_features import (
     UserFeaturesExtractor,
 )
 from app.models.user import (
@@ -31,6 +31,7 @@ from app.repositories.user_features_repository import (
 
 @shared_task
 def analyze_user_profile(user_id: uuid.UUID) -> None:
+    """Start Celery task."""
 
     asyncio.run(
         _analyze_user_profile(
