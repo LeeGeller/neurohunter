@@ -1,9 +1,10 @@
-from typing import (
-    Optional,
-)
+"""Extract VacancyFeatures using LLM."""
 
 from app.llm.client import (
     OllamaClient,
+)
+from app.llm.extractors.base import (
+    BaseExtractor,
 )
 from app.llm.prompts import (
     VACANCY_FEATURES_PROMPT,
@@ -34,17 +35,20 @@ from app.schemas.vacancy.vacancy_features import (
 )
 
 
-class VacancyFeaturesExtractor:
+class VacancyFeaturesExtractor(
+    BaseExtractor[VacancyFeaturesSchema]
+):
     """Analyze vacancies using LLM."""
 
     def __init__(
         self,
         llm_client: OllamaClient,
-        response_schema: Optional[dict] = None,
     ) -> None:
         """Initialize the VacancyFeaturesExtractor."""
-        self.llm_client = llm_client
-        self.response_schema = response_schema
+        super().__init__(
+            llm_client=llm_client,
+            response_model=VacancyFeaturesSchema,
+        )
 
 
     async def extract_features(self, vacancy: Vacancy) -> VacancyFeaturesSchema:
@@ -109,12 +113,5 @@ class VacancyFeaturesExtractor:
             ),
         )
 
-        response = await self.llm_client.generate(
-            prompt,
-            self.response_schema,
-        )
-
-        features = VacancyFeaturesSchema.model_validate_json(response)
-
-        return features
+        return await self.generate(promt=prompt)
 

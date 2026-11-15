@@ -1,9 +1,10 @@
-from typing import (
-    Optional,
-)
+"""ResumeFeatures extractor."""
 
 from app.llm.client import (
     OllamaClient,
+)
+from app.llm.extractors.base import (
+    BaseExtractor,
 )
 from app.llm.prompts import (
     RESUME_FEATURES_PROMPT,
@@ -13,17 +14,20 @@ from app.schemas.user.resume_features import (
 )
 
 
-class ResumeFeaturesExtractor:
+class ResumeFeaturesExtractor(
+    BaseExtractor[ResumeFeaturesSchema]
+):
     """Analyze resumes using LLM."""
 
     def __init__(
         self,
         llm_client: OllamaClient,
-        response_schema: Optional[dict] = None,
     ) -> None:
         """Initialize the ResumeFeaturesExtractor."""
-        self.llm_client = llm_client
-        self.response_schema = response_schema
+        super().__init__(
+            llm_client=llm_client,
+            response_model=ResumeFeaturesSchema,
+        )
 
     async def extract_features(self, resume: str) -> ResumeFeaturesSchema:
         """Extract structured features from a resume using LLM."""
@@ -32,11 +36,4 @@ class ResumeFeaturesExtractor:
             resume_text=resume
         )
 
-        response = await self.llm_client.generate(
-            prompt,
-            self.response_schema,
-        )
-
-        resume_features = ResumeFeaturesSchema.model_validate_json(response)
-
-        return resume_features
+        return await self.generate(promt=prompt)
