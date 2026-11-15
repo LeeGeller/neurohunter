@@ -7,6 +7,9 @@ from pydantic import (
     BaseModel,
     Field,
 )
+from app.schemas.knowledge.concept_extraction import (
+    ConceptSchema,
+)
 
 
 class ProjectSchema(BaseModel):
@@ -31,15 +34,13 @@ class ResumeFeaturesSchema(BaseModel):
     job_titles: list[str] = Field(
         default_factory=list,
     )
-    hard_skills: list[str] = Field(
+    hard_skills: list[ConceptSchema] = Field(
         default_factory=list,
     )
-    soft_skills: list[str] = Field(
+    soft_skills: list[ConceptSchema] = Field(
         default_factory=list,
     )
-
     experience: Optional[float]
-
     projects: list[ProjectSchema] = Field(
         default_factory=list,
     )
