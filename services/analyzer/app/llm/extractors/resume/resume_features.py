@@ -36,4 +36,4 @@ class ResumeFeaturesExtractor(
             resume_text=resume
         )
 
-        return await self.generate(promt=prompt)
+        return await self.generate(prompt=prompt)

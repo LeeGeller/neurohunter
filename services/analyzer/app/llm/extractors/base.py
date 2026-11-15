@@ -46,11 +46,11 @@ class BaseExtractor(Generic[T]):
             else response_schema
         )
 
-    async def generate(self, promt: str) -> Union[T, dict[str, Any]]:
+    async def generate(self, prompt: str) -> Union[T, dict[str, Any]]:
         """Generate."""
 
         response = await self.llm_client.generate(
-            prompt=promt,
+            prompt=prompt,
             response_schema=self.response_schema,
         )
 

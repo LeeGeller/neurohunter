@@ -34,7 +34,7 @@ class UserFeaturesExtractor(
         profile_dict = self.profile_to_dict(user)
         prompt = USER_FEATURES_PROMPT.format(**profile_dict)
 
-        return await self.generate(promt=prompt)
+        return await self.generate(prompt=prompt)
 
     def profile_to_dict(self, user: UserProfile) -> dict:
         """Convert UserProfile object to dictionary."""
