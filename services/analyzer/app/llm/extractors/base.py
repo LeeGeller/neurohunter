@@ -26,7 +26,7 @@ class BaseExtractor(Generic[T]):
     def __init__(
         self,
         llm_client: OllamaClient,
-        response_model: Optional[type[BaseModel]]=None,
+        response_model: Optional[type[T]]=None,
         response_schema: Optional[dict[str, Any]]=None,
     ) -> None:
         """Initialize."""
