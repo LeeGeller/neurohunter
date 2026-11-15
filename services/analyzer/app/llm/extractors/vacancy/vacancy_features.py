@@ -1,7 +1,3 @@
-import json
-from typing import (
-    Optional,
-)
 from typing import (
     Optional,
 )
@@ -10,13 +6,7 @@ from app.llm.client import (
     OllamaClient,
 )
 from app.llm.prompts import (
-    RESUME_FEATURES_PROMPT,
-    USER_FEATURES_PROMPT,
     VACANCY_FEATURES_PROMPT,
-    VACANCY_REQUIREMENTS_PROMPT,
-)
-from app.models.user import (
-    UserProfile,
 )
 from app.models.vacancy import (
     Vacancy,
@@ -39,14 +29,8 @@ from app.schemas.user.profile_enums import (
     TaskVarietyPreference,
     WeekendWork,
 )
-from app.schemas.user.resume_features import (
-    ResumeFeaturesSchema,
-)
 from app.schemas.vacancy.vacancy_features import (
     VacancyFeaturesSchema,
-)
-from app.schemas.vacancy.vacancy_requirements import (
-    VacancyRequirementsSchema,
 )
 
 
@@ -134,85 +118,3 @@ class VacancyFeaturesExtractor:
 
         return features
 
-
-class ResumeFeaturesExtractor:
-    """Analyze resumes using LLM."""
-
-    def __init__(
-        self,
-        llm_client: OllamaClient,
-        response_schema: Optional[dict] = None,
-    ) -> None:
-        """Initialize the ResumeFeaturesExtractor."""
-        self.llm_client = llm_client
-        self.response_schema = response_schema
-
-    async def extract_features(self, resume: str) -> ResumeFeaturesSchema:
-        """Extract structured features from a resume using LLM."""
-
-        prompt = RESUME_FEATURES_PROMPT.format(
-            resume_text=resume
-        )
-
-        response = await self.llm_client.generate(
-            prompt,
-            self.response_schema,
-        )
-
-        resume_features = ResumeFeaturesSchema.model_validate_json(response)
-
-        return resume_features
-
-
-class UserFeaturesExtractor:
-    """Analyze users using LLM."""
-
-    def __init__(self, llm_client: OllamaClient) -> None:
-        self.llm_client = llm_client
-
-    async def extract_features(self, user: UserProfile) -> dict:
-        """Extract structured features from a user using LLM."""
-
-        profile_dict = self.profile_to_dict(user)
-        prompt = USER_FEATURES_PROMPT.format(**profile_dict)
-
-        response = await self.llm_client.generate(prompt)
-
-        return json.loads(response)
-
-    def profile_to_dict(self, user: UserProfile) -> dict:
-        """Convert UserProfile object to dictionary."""
-        return {
-            column.name: getattr(user, column.name)
-            for column in user.__table__.columns
-        }
-
-
-class VacancyRequirementsExtractor:
-    """Analyze vacancy requirements using LLM."""
-
-    def __init__(
-        self,
-        llm_client: OllamaClient,
-        response_schema: Optional[dict],
-    ) -> None:
-        """Initialize the VacancyRequirementsExtractor."""
-        self.llm_client = llm_client
-        self.response_schema = response_schema
-
-    async def extract_requirements(self, vacancy: Vacancy) -> VacancyRequirementsSchema:
-        """Extract structured requirements from a vacancy using LLM."""
-
-        prompt = VACANCY_REQUIREMENTS_PROMPT.format(
-            title=vacancy.title,
-            description=vacancy.description,
-        )
-
-        response = await self.llm_client.generate(
-            prompt,
-            self.response_schema,
-        )
-
-        requirement = VacancyRequirementsSchema.model_validate_json(response)
-
-        return requirement
