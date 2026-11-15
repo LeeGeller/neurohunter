@@ -1,4 +1,4 @@
-import json
+"""UserFeatures extraxtor using LLM."""
 
 from app.llm.client import (
     OllamaClient,

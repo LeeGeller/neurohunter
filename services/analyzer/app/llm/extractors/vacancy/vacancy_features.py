@@ -114,4 +114,3 @@ class VacancyFeaturesExtractor(
         )
 
         return await self.generate(prompt=prompt)
-
