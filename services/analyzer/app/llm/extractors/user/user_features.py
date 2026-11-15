@@ -3,29 +3,38 @@ import json
 from app.llm.client import (
     OllamaClient,
 )
+from app.llm.extractors.base import (
+    BaseExtractor,
+)
 from app.llm.prompts import (
     USER_FEATURES_PROMPT,
 )
 from app.models.user import (
     UserProfile,
 )
+from app.schemas.user.user_features import (
+    UserFeaturesSchema,
+)
 
 
-class UserFeaturesExtractor:
+class UserFeaturesExtractor(
+    BaseExtractor[UserFeaturesSchema]
+):
     """Analyze users using LLM."""
 
     def __init__(self, llm_client: OllamaClient) -> None:
-        self.llm_client = llm_client
+        super().__init__(
+            llm_client=llm_client,
+            response_model=UserFeaturesSchema
+        )
 
-    async def extract_features(self, user: UserProfile) -> dict:
+    async def extract_features(self, user: UserProfile) -> UserFeaturesSchema:
         """Extract structured features from a user using LLM."""
 
         profile_dict = self.profile_to_dict(user)
         prompt = USER_FEATURES_PROMPT.format(**profile_dict)
 
-        response = await self.llm_client.generate(prompt)
-
-        return json.loads(response)
+        return await self.generate(promt=prompt)
 
     def profile_to_dict(self, user: UserProfile) -> dict:
         """Convert UserProfile object to dictionary."""
