@@ -17,7 +17,7 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
-from app.llm.extractor import (
+from app.llm.extractors.user.user_features import (
     UserFeaturesExtractor,
 )
 from app.models.user import (
@@ -31,6 +31,7 @@ from app.repositories.user_features_repository import (
 
 @shared_task
 def analyze_user_profile(user_id: uuid.UUID) -> None:
+    """Start Celery task."""
 
     asyncio.run(
         _analyze_user_profile(
@@ -73,16 +74,21 @@ async def _analyze_user_profile(user_id: uuid.UUID) -> None:
 
         if not old_user_features:
             user_features = UserFeatures(
-                **features,
+                user_id=user_id,
+                job_titles=features.job_titles,
                 hard_constraints=hard_constraints,
+                preferences=features.preferences,
+                tolerances=features.tolerances,
+                context=features.context,
             )
+
             session.add(user_features)
         else:
-            old_user_features.job_titles = features["job_titles"]
+            old_user_features.job_titles = features.job_titles
             old_user_features.hard_constraints = hard_constraints
-            old_user_features.preferences = features["preferences"]
-            old_user_features.tolerances = features["tolerances"]
-            old_user_features.context = features["context"]
+            old_user_features.preferences = features.preferences
+            old_user_features.tolerances = features.tolerances
+            old_user_features.context = features.context
 
         await session.commit()
 

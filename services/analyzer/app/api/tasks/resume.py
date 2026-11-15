@@ -17,20 +17,18 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
-from app.llm.extractor import (
+from app.llm.extractors.resume.resume_features import (
     ResumeFeaturesExtractor,
 )
 from app.models.resume import (
     ResumeDocument,
     ResumeFeatures,
 )
-from app.schemas.user.resume_features import (
-    ResumeFeaturesSchema,
-)
 
 
 @shared_task
 def analyze_resume(user_id: uuid.UUID) -> None:
+    """Start Celery task."""
 
     asyncio.run(
         _analyze_resume(
@@ -41,6 +39,7 @@ def analyze_resume(user_id: uuid.UUID) -> None:
 
 async def _analyze_resume(user_id: uuid.UUID) -> None:
     """Analyze user resume using LLM."""
+
     async for session in get_session():
         result = await session.execute(
             select(ResumeDocument).where(
@@ -57,14 +56,16 @@ async def _analyze_resume(user_id: uuid.UUID) -> None:
             base_url=settings.ollama_host,
             model=settings.ollama_model
         )
-        extractor = ResumeFeaturesExtractor(
-            llm_client=llm_model,
-            response_schema=ResumeFeaturesSchema.model_json_schema()
-        )
-
-        new_features_resume = await extractor.extract_features(
-            resume.text,
+        try:
+            extractor = ResumeFeaturesExtractor(
+                llm_client=llm_model,
             )
+
+            new_features_resume = await extractor.extract_features(
+                resume.text,
+                )
+        finally:
+            await llm_model.close()
 
         old_resume_features_result = await session.execute(
             select(ResumeFeatures).where(
@@ -73,26 +74,21 @@ async def _analyze_resume(user_id: uuid.UUID) -> None:
         )
         old_resume_features = old_resume_features_result.scalar_one_or_none()
 
+        new_features_resume_data = new_features_resume.model_dump()
+
         if not old_resume_features:
             resume_features = ResumeFeatures(
                 user_id=user_id,
-                **new_features_resume.model_dump(),
+                **new_features_resume_data,
             )
+
             session.add(resume_features)
         else:
-            old_resume_features.job_titles = new_features_resume.job_titles
-            old_resume_features.hard_skills = new_features_resume.hard_skills
-            old_resume_features.soft_skills = new_features_resume.soft_skills
-            old_resume_features.experience = new_features_resume.experience
-            old_resume_features.projects = [
-                project.model_dump()
-                for project in new_features_resume.projects
-            ]
-            old_resume_features.weaknesses = new_features_resume.weaknesses
-            old_resume_features.strengths = new_features_resume.strengths
-            old_resume_features.experience_resume = [
-                experience.model_dump()
-                for experience in new_features_resume.experience_resume
-            ]
+            for field, value in new_features_resume_data.items():
+                setattr(
+                    old_resume_features,
+                    field,
+                    value,
+                )
 
         await session.commit()

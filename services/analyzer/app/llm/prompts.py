@@ -1392,7 +1392,6 @@ about_me: {about_me}
 Верни результат строго в следующем формате JSON:
 
 {{
-    "user_id": "{user_id}",
     "job_titles": [],
     "preferences": [],
     "tolerances": [],

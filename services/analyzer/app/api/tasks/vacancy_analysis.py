@@ -19,8 +19,10 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
-from app.llm.extractor import (
+from app.llm.extractors.vacancy.vacancy_features import (
     VacancyFeaturesExtractor,
+)
+from app.llm.extractors.vacancy.vacancy_requirements import (
     VacancyRequirementsExtractor,
 )
 from app.models.vacancy import (
@@ -31,12 +33,6 @@ from app.models.vacancy import (
 from app.repositories.repository_manager import (
     RepositoryManager,
 )
-from app.schemas.vacancy.vacancy_features import (
-    VacancyFeaturesSchema,
-)
-from app.schemas.vacancy.vacancy_requirements import (
-    VacancyRequirementsSchema,
-)
 from app.services.vacancy_context_service import (
     VacancyContextService,
 )
@@ -45,7 +41,10 @@ from app.services.vacancy_context_service import (
 @shared_task
 def analyze_vacancies_task() -> None:
     """Celery task to analyze vacancies."""
-    asyncio.run(_analyze_vacancies())
+
+    asyncio.run(
+        _analyze_vacancies()
+    )
 
 
 async def _analyze_vacancies() -> None:
@@ -78,12 +77,10 @@ async def _analyze_vacancies() -> None:
 
     extractor_vacancy_feature = VacancyFeaturesExtractor(
         llm_client=llm_model,
-        response_schema=VacancyFeaturesSchema.model_json_schema(),
     )
 
     extractor_vacancy_requirements = VacancyRequirementsExtractor(
         llm_client=llm_model,
-        response_schema=VacancyRequirementsSchema.model_json_schema(),
     )
 
     # Initialize PostgreSQL session

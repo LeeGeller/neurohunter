@@ -1,9 +1,6 @@
 """User features schemas."""
 
 import uuid
-from typing import (
-    Union,
-)
 
 from pydantic import (
     BaseModel,
@@ -11,10 +8,8 @@ from pydantic import (
 )
 
 
-class UserFeatures(BaseModel):
+class UserFeaturesSchema(BaseModel):
     """User features model for LLM."""
-
-    user_id: uuid.UUID
 
     job_titles: list[str] = Field(
         default_factory=list,
