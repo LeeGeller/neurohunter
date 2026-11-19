@@ -265,9 +265,9 @@ class SkillsMatcher:
 
     def build_skills_matrix(
         self,
-        mandatory_skills: list[Skill],
+        vacancy_skills: list[Skill],
         resume_skills: list[Skill],
-        mandatory_skill_groups: Optional[list[SkillGroup]] = None,
+        vacancy_skill_groups: Optional[list[SkillGroup]] = None,
         resume_skill_groups: Optional[list[SkillGroup]] = None,
     ) -> None:
         """Build individual skill and logical group matrices.
@@ -290,12 +290,12 @@ class SkillsMatcher:
         resume skills, even when the resume has no corresponding group.
         """
 
-        mandatory_skill_groups = mandatory_skill_groups or []
+        mandatory_skill_groups = vacancy_skill_groups or []
         resume_skill_groups = resume_skill_groups or []
 
         mandatory_names = [
             self.normalize_skill_name(skill['canonical_name'])
-            for skill in mandatory_skills
+            for skill in vacancy_skills
         ]
 
         confirmed_resume_names = sorted(
@@ -340,22 +340,6 @@ class SkillsMatcher:
             ]
             for mandatory_group in mandatory_skill_groups
         ]
-
-        # Diagnostics.
-        print('\n--- MATCHING DIAGNOSTICS ---')
-
-        print('MANDATORY SKILLS:', mandatory_names)
-        print('RESUME SKILLS:', confirmed_resume_names)
-
-        print('MANDATORY GROUPS:', mandatory_skill_groups)
-        print('RESUME GROUPS:', resume_skill_groups)
-
-        print('STANDALONE SKILL INDICES:', self._standalone_skill_indices)
-
-        print('SKILL MATRIX:', self.matrix)
-        print('GROUP MATRIX:', self.group_matrix)
-
-        print('--- END DIAGNOSTICS ---\n')
 
     def calculate_skill_matches(self) -> None:
         """Calculate binary matches for individual vacancy skills."""

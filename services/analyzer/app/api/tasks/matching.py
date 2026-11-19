@@ -1,8 +1,5 @@
 import asyncio
 import uuid
-from typing import (
-    TYPE_CHECKING,
-)
 
 from celery import (
     shared_task,
@@ -17,7 +14,10 @@ from app.database.mongo_client import (
 from app.database.postgres import (
     get_session,
 )
-from services.analyzer.app.matching_service.skills_matcher import (
+from app.matching_service.experience_matcher import (
+    ExperienceMatcher,
+)
+from app.matching_service.skills_matcher import (
     SkillsMatcher,
 )
 from app.models.vacancy import (
@@ -62,11 +62,11 @@ async def _match():
     async for session in get_session():
 
         # Initialize SkillsMatcher
-        mandatory_skills_matcher = SkillsMatcher(session=session)
+        skills_matcher = SkillsMatcher(session=session)
 
         for vacancy_user in vacancy_users:
 
-            resume_features = await mandatory_skills_matcher.get_resume_features(
+            resume_features = await skills_matcher.get_resume_features(
                 user_id=uuid.UUID(vacancy_user.user_id),
             )
 
@@ -79,27 +79,58 @@ async def _match():
             )
             vacancy_id = vacancy_identity.scalar_one_or_none()
 
-            vacancy_requirements = await mandatory_skills_matcher.get_vacancy_requirements(
+            vacancy_requirements = await skills_matcher.get_vacancy_requirements(
                 vacancy_id=vacancy_id,
             )
 
             if resume_features and vacancy_requirements:
 
-                mandatory_skills_matcher.build_skills_matrix(
-                    mandatory_skills=vacancy_requirements.mandatory_skills,
+                skills_matcher.build_skills_matrix(
+                    vacancy_skills=vacancy_requirements.mandatory_skills,
                     resume_skills=resume_features.hard_skills,
-                    mandatory_skill_groups=vacancy_requirements.mandatory_skill_groups,
+                    vacancy_skill_groups=vacancy_requirements.mandatory_skill_groups,
                     resume_skill_groups=resume_features.hard_skill_groups,
                 )
 
-                mandatory_skills_matcher.calculate_skill_matches()
+                skills_matcher.calculate_skill_matches()
 
-                mandatory_skills_matcher.calculate_group_matches(
+                skills_matcher.calculate_group_matches(
                     mandatory_skill_groups=vacancy_requirements.mandatory_skill_groups,
                     resume_skills=resume_features.hard_skills,
                     resume_skill_groups=resume_features.hard_skill_groups,
                 )
 
-                skill_coverage = mandatory_skills_matcher.calculate_coverage()
-                group_coverage = mandatory_skills_matcher.calculate_group_coverage()
+                mandatory_skill_coverage = skills_matcher.calculate_coverage()
+                mandatory_group_coverage = skills_matcher.calculate_group_coverage()
+
+                skills_matcher.build_skills_matrix(
+                    vacancy_skills=vacancy_requirements.preferred_skills,
+                    resume_skills=resume_features.hard_skills,
+                    vacancy_skill_groups=vacancy_requirements.preferred_skill_groups,
+                    resume_skill_groups=resume_features.hard_skill_groups,
+                )
+
+                skills_matcher.calculate_skill_matches()
+                skills_matcher.calculate_group_matches(
+                    mandatory_skill_groups=vacancy_requirements.preferred_skill_groups,
+                    resume_skills=resume_features.hard_skills,
+                    resume_skill_groups=resume_features.hard_skill_groups,
+                )
+
+                prefered_skill_coverage = skills_matcher.calculate_coverage()
+                prefered_group_coverage = skills_matcher.calculate_group_coverage()
+
+                experience_matcher = ExperienceMatcher()
+
+                experience_matcher.calculate_experience(
+                    vacancy_requirements.experience_min,
+                    vacancy_requirements.experience_max,
+                    resume_features.experience,
+                )
+
+                print('LOW', experience_matcher.low_experience)
+                print('HIGH', experience_matcher.high_experience)
+
+
+
 

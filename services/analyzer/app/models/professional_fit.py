@@ -8,8 +8,9 @@ from typing import (
 
 from sqlalchemy import (
     UUID,
-    ForeignKey,
+    Boolean,
     Float,
+    ForeignKey,
     UniqueConstraint,
 )
 from sqlalchemy.orm import (
@@ -78,4 +79,23 @@ class ProfessionalFit(Base):
     mandatory_skill_groups_coverage: Mapped[float] = mapped_column(
         Float,
         nullable=True,
+    )
+
+    prefered_skills_coverage: Mapped[float] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    prefered_skill_groups_coverage: Mapped[float] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    # Experience
+    low_experience: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+    )
+    high_experience: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
     )
