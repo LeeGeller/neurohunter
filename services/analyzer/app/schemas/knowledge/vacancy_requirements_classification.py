@@ -14,9 +14,9 @@ class VacancyRequirementsClassificationSchema(BaseModel):
         extra='forbid',
     )
 
-    mandatory_text: list[str] = Field(
+    mandatory_skills: list[str] = Field(
         default_factory=list,
     )
-    preferred_text: list[str] = Field(
+    preferred_skills: list[str] = Field(
         default_factory=list,
     )

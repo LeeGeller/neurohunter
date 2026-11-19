@@ -259,15 +259,28 @@ class VacancyRequirements(Base):
     )
 
     # Skills
-    mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
+    mandatory_skills: Mapped[list[dict]] = mapped_column(
         JSON,
-        default=None,
-        nullable=True,
+        nullable=False,
+        default=list,
     )
-    preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
+
+    preferred_skills: Mapped[list[dict]] = mapped_column(
         JSON,
-        default=None,
-        nullable=True,
+        nullable=False,
+        default=list,
+    )
+
+    mandatory_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    preferred_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
     )
 
     # Professional experience

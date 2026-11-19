@@ -72,27 +72,20 @@ class VacancyRequirementsExtractor(
             description=vacancy.description,
         )
 
-        classification = await self.generate(prompt=prompt)
+        vacancy_requirements = await self.generate(prompt=prompt)
 
         mandatory, preferred = await asyncio.gather(
-            self._extract_concepts(classification.mandatory_text),
-            self._extract_concepts(classification.preferred_text),
+            self._extract_concepts(vacancy_requirements.mandatory_skills),
+            self._extract_concepts(vacancy_requirements.preferred_skills),
         )
 
-        data = classification.model_dump(
-            exclude={
-                'mandatory_text',
-                'preferred_text',
-            },
-        )
+        vacancy_requirements_data = vacancy_requirements.model_dump()
 
-        data.update(
-            {
-                'mandatory_skills': mandatory.concepts,
-                'mandatory_skill_groups': mandatory.concept_groups,
-                'preferred_skills': preferred.concepts,
-                'preferred_skill_groups': preferred.concept_groups,
-            },
-        )
+        vacancy_requirements_data.update({
+            'mandatory_skills': mandatory.concepts,
+            'mandatory_skill_groups': mandatory.concept_groups,
+            'preferred_skills': preferred.concepts,
+            'preferred_skill_groups': preferred.concept_groups,
+        })
 
-        return VacancyRequirementsSchema.model_validate(data)
+        return VacancyRequirementsSchema.model_validate(vacancy_requirements_data)

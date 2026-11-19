@@ -9,30 +9,53 @@ from pydantic import (
     Field,
 )
 
+from app.schemas.knowledge.concept_extraction import (
+    ConceptGroupSchema,
+    ConceptSchema,
+)
+
 
 class VacancyRequirementsSchema(BaseModel):
     """Schema for vacancy requirements extracted from LLM."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
 
     vacancy_id: uuid.UUID
 
-    mandatory_skills: Optional[list[str]] = Field(
+    mandatory_skills: list[ConceptSchema] = Field(
+        default_factory=list,
         alias='mandatorySkills',
     )
-    preferred_skills: Optional[list[str]] = Field(
+    mandatory_skill_groups: list[ConceptGroupSchema] = Field(
+        default_factory=list,
+        alias='mandatorySkillGroups',
+    )
+
+    preferred_skills: list[ConceptSchema] = Field(
+        default_factory=list,
         alias='preferredSkills',
+    )
+    preferred_skill_groups: list[ConceptGroupSchema] = Field(
+        default_factory=list,
+        alias='preferredSkillGroups',
     )
 
     experience_min: Optional[float] = Field(
+        default=None,
         alias='experienceMin',
     )
     experience_max: Optional[float] = Field(
+        default=None,
         alias='experienceMax',
     )
     education_requirement: Optional[str] = Field(
+        default=None,
         alias='educationRequirement',
     )
-    evidence: Optional[str] = Field(
+    evidence: Optional[list[str]] = Field(
+        default=None,
         alias='evidence',
     )
