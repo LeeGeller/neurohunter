@@ -9,6 +9,8 @@ from typing import (
 from sqlalchemy import (
     UUID,
     ForeignKey,
+    Float,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -33,6 +35,14 @@ class ProfessionalFit(Base):
     """Professional fit class."""
 
     __tablename__ = 'professional_fit'
+
+    __table_args__ = (
+        UniqueConstraint(
+            'resume_id',
+            'vacancy_requirements_id',
+            name='uq_professional_fit_resume_id_vacancy_requirements_id',
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -61,5 +71,11 @@ class ProfessionalFit(Base):
     )
 
     # Semantic link
-    # match_for_mandatory_skills
-
+    mandatory_skills_coverage: Mapped[float] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    mandatory_skill_groups_coverage: Mapped[float] = mapped_column(
+        Float,
+        nullable=True,
+    )
