@@ -98,6 +98,18 @@ class ResumeFeatures(Base):
         default=list,
     )
 
+    hard_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+    )
+
+    soft_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+    )
+
     experience: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,

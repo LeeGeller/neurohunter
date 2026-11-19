@@ -12,7 +12,6 @@ from app.llm.extractors.knowledge.concept_extraction import (
     ConceptExtractor,
 )
 from app.llm.prompts import (
-    CONCEPT_EXTRACTION_PROMPT,
     RESUME_FEATURES_PROMPT,
 )
 from app.schemas.knowledge.concept_extraction import (
@@ -68,29 +67,36 @@ class ResumeFeaturesExtractor(BaseExtractor[ResumeDataSchema]):
         """Extract structured features from a resume."""
 
         data_prompt = RESUME_FEATURES_PROMPT.replace(
-            '{resume_text}',
+            "{resume_text}",
             resume,
         )
 
         resume_data = await self.generate(prompt=data_prompt)
 
-        hard_skills_prompt = CONCEPT_EXTRACTION_PROMPT.replace(
-            '{source_text}',
-            '\n'.join(resume_data.hard_skills),
-        )
-
-        soft_skills_prompt = CONCEPT_EXTRACTION_PROMPT.replace(
-            '{source_text}',
-            '\n'.join(resume_data.soft_skills),
-        )
-
         hard_skills, soft_skills = await asyncio.gather(
-            self.concept_extractor.generate(prompt=hard_skills_prompt),
-            self.concept_extractor.generate(prompt=soft_skills_prompt),
+            self._extract_concepts(resume_data.hard_skills),
+            self._extract_concepts(resume_data.soft_skills),
         )
 
-        resume_data.hard_skills = hard_skills.concepts
+        resume_features_data = resume_data.model_dump()
 
-        resume_data.soft_skills = soft_skills.concepts
+        resume_features_data.update({
+            'hard_skills': [
+                concept.model_dump()
+                for concept in hard_skills.concepts
+            ],
+            'hard_skill_groups': [
+                group.model_dump()
+                for group in hard_skills.concept_groups
+            ],
+            'soft_skills': [
+                concept.model_dump()
+                for concept in soft_skills.concepts
+            ],
+            'soft_skill_groups': [
+                group.model_dump()
+                for group in soft_skills.concept_groups
+            ],
+        })
 
-        return ResumeFeaturesSchema.model_validate(resume_data.model_dump())
+        return ResumeFeaturesSchema.model_validate(resume_features_data)
