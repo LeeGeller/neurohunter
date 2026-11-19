@@ -17,8 +17,8 @@ from app.database.mongo_client import (
 from app.database.postgres import (
     get_session,
 )
-from app.matching_service.mandatory_skills_matcher import (
-    MandatorySkillsMatcher,
+from services.analyzer.app.matching_service.skills_matcher import (
+    SkillsMatcher,
 )
 from app.models.vacancy import (
     VacancyIdentity,
@@ -61,8 +61,8 @@ async def _match():
 
     async for session in get_session():
 
-        # Initialize MandatorySkillsMatcher
-        mandatory_skills_matcher = MandatorySkillsMatcher(session=session)
+        # Initialize SkillsMatcher
+        mandatory_skills_matcher = SkillsMatcher(session=session)
 
         for vacancy_user in vacancy_users:
 
@@ -84,15 +84,22 @@ async def _match():
             )
 
             if resume_features and vacancy_requirements:
-                print('MANDATORY:', vacancy_requirements.mandatory_skills)
-                print('RESUME:', resume_features.hard_skills)
-                mandatory_skills_matcher.build_skills_matrix(
-                    vacancy_requirements.mandatory_skills,
-                    resume_features.hard_skills,
-                )
-                mandatory_skills_matcher.calculate_skill_matches()
-                coverage = mandatory_skills_matcher.calculate_coverage()
 
-                print(mandatory_skills_matcher.matrix)
-                print(mandatory_skills_matcher.skill_matches)
-                print(coverage)
+                mandatory_skills_matcher.build_skills_matrix(
+                    mandatory_skills=vacancy_requirements.mandatory_skills,
+                    resume_skills=resume_features.hard_skills,
+                    mandatory_skill_groups=vacancy_requirements.mandatory_skill_groups,
+                    resume_skill_groups=resume_features.hard_skill_groups,
+                )
+
+                mandatory_skills_matcher.calculate_skill_matches()
+
+                mandatory_skills_matcher.calculate_group_matches(
+                    mandatory_skill_groups=vacancy_requirements.mandatory_skill_groups,
+                    resume_skills=resume_features.hard_skills,
+                    resume_skill_groups=resume_features.hard_skill_groups,
+                )
+
+                skill_coverage = mandatory_skills_matcher.calculate_coverage()
+                group_coverage = mandatory_skills_matcher.calculate_group_coverage()
+
