@@ -26,7 +26,7 @@ class BaseExtractor(Generic[T]):
     def __init__(
         self,
         llm_client: OllamaClient,
-        response_model: Optional[type[BaseModel]]=None,
+        response_model: Optional[type[T]]=None,
         response_schema: Optional[dict[str, Any]]=None,
     ) -> None:
         """Initialize."""
@@ -46,15 +46,15 @@ class BaseExtractor(Generic[T]):
             else response_schema
         )
 
-    async def generate(self, prompt: str) -> Union[T, dict[str, Any]]:
-        """Generate."""
+    async def generate(self, prompt: str) -> T:
+        """Generate and validate structured output."""
 
         response = await self.llm_client.generate(
             prompt=prompt,
             response_schema=self.response_schema,
         )
 
-        if self.response_model:
-            return self.response_model.model_validate_json(response)
+        if not self.response_model:
+            raise ValueError('Response model is required')
 
-        return json.loads(response)
+        return self.response_model.model_validate_json(response)

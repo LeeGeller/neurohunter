@@ -17,6 +17,9 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
+from app.llm.extractors.knowledge.concept_extraction import (
+    ConceptExtractor,
+)
 from app.llm.extractors.resume.resume_features import (
     ResumeFeaturesExtractor,
 )
@@ -27,12 +30,12 @@ from app.models.resume import (
 
 
 @shared_task
-def analyze_resume(user_id: uuid.UUID) -> None:
+def analyze_resume(user_id: str) -> None:
     """Start Celery task."""
 
     asyncio.run(
         _analyze_resume(
-            user_id=user_id,
+            user_id=uuid.UUID(user_id),
         ),
     )
 
@@ -57,8 +60,13 @@ async def _analyze_resume(user_id: uuid.UUID) -> None:
             model=settings.ollama_model
         )
         try:
+            concept_extractor = ConceptExtractor(
+                llm_client=llm_model,
+            )
+
             extractor = ResumeFeaturesExtractor(
                 llm_client=llm_model,
+                concept_extractor=concept_extractor,
             )
 
             new_features_resume = await extractor.extract_features(

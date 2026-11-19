@@ -78,7 +78,7 @@ class ResumeFeatures(Base):
         back_populates='resume_features',
     )
 
-    professional_fit: Mapped['ProfessionalFit'] = relationship(
+    professional_fits: Mapped[list['ProfessionalFit']] = relationship(
         back_populates='resume_feature',
         cascade='all, delete-orphan',
     )
@@ -88,13 +88,25 @@ class ResumeFeatures(Base):
         default=list,
     )
 
-    hard_skills: Mapped[list[str]] = mapped_column(
-        ARRAY(Text),
+    hard_skills: Mapped[list[dict]] = mapped_column(
+        JSONB,
         default=list,
     )
 
-    soft_skills: Mapped[list[str]] = mapped_column(
-        ARRAY(Text),
+    soft_skills: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        default=list,
+    )
+
+    hard_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+    )
+
+    soft_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        nullable=False,
         default=list,
     )
 

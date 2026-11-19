@@ -19,6 +19,9 @@ from app.database.postgres import (
 from app.llm.client import (
     OllamaClient,
 )
+from app.llm.extractors.knowledge.concept_extraction import (
+    ConceptExtractor,
+)
 from app.llm.extractors.vacancy.vacancy_features import (
     VacancyFeaturesExtractor,
 )
@@ -79,8 +82,13 @@ async def _analyze_vacancies() -> None:
         llm_client=llm_model,
     )
 
+    concept_extractor = ConceptExtractor(
+        llm_client=llm_model,
+    )
+
     extractor_vacancy_requirements = VacancyRequirementsExtractor(
         llm_client=llm_model,
+        concept_extractor=concept_extractor,
     )
 
     # Initialize PostgreSQL session

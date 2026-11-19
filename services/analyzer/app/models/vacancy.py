@@ -252,22 +252,34 @@ class VacancyRequirements(Base):
         nullable=False,
     )
 
-    professional_fit: Mapped['ProfessionalFit'] = relationship(
+    professional_fits: Mapped[list['ProfessionalFit']] = relationship(
         back_populates='vacancy_requirements',
         cascade='all, delete-orphan',
-        single_parent=True,
     )
 
     # Skills
-    mandatory_skills: Mapped[Optional[list[str]]] = mapped_column(
+    mandatory_skills: Mapped[list[dict]] = mapped_column(
         JSON,
-        default=None,
-        nullable=True,
+        nullable=False,
+        default=list,
     )
-    preferred_skills: Mapped[Optional[list[str]]] = mapped_column(
+
+    preferred_skills: Mapped[list[dict]] = mapped_column(
         JSON,
-        default=None,
-        nullable=True,
+        nullable=False,
+        default=list,
+    )
+
+    mandatory_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    preferred_skill_groups: Mapped[list[dict]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
     )
 
     # Professional experience

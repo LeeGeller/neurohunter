@@ -31,7 +31,7 @@ class VacancyFeaturesSchema(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
         populate_by_name=True,
-)
+    )
 
     # Work schedule
     work_days_per_week: Optional[float] = Field(
