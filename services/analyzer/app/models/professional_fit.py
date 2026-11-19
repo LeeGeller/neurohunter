@@ -81,11 +81,11 @@ class ProfessionalFit(Base):
         nullable=True,
     )
 
-    prefered_skills_coverage: Mapped[float] = mapped_column(
+    preferred_skills_coverage: Mapped[float] = mapped_column(
         Float,
         nullable=True,
     )
-    prefered_skill_groups_coverage: Mapped[float] = mapped_column(
+    preferred_skill_groups_coverage: Mapped[float] = mapped_column(
         Float,
         nullable=True,
     )
