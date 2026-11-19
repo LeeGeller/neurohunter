@@ -78,7 +78,7 @@ class ResumeFeatures(Base):
         back_populates='resume_features',
     )
 
-    professional_fit: Mapped['ProfessionalFit'] = relationship(
+    professional_fits: Mapped[list['ProfessionalFit']] = relationship(
         back_populates='resume_feature',
         cascade='all, delete-orphan',
     )

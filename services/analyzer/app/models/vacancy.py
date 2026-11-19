@@ -252,10 +252,9 @@ class VacancyRequirements(Base):
         nullable=False,
     )
 
-    professional_fit: Mapped['ProfessionalFit'] = relationship(
+    professional_fits: Mapped[list['ProfessionalFit']] = relationship(
         back_populates='vacancy_requirements',
         cascade='all, delete-orphan',
-        single_parent=True,
     )
 
     # Skills
