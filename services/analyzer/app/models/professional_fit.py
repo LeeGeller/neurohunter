@@ -91,10 +91,6 @@ class ProfessionalFit(Base):
     )
 
     # Experience
-    low_experience: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-    )
     high_experience: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,

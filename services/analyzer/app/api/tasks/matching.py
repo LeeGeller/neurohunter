@@ -122,10 +122,14 @@ async def _match() -> None:
                 )
 
                 if (
-                    mandatory_skill_coverage == 0.0
-                    and mandatory_group_coverage == 0.0
+                    vacancy_requirements.mandatory_skills
+                    or vacancy_requirements.mandatory_skill_groups
                 ):
-                    continue
+                    if (
+                        mandatory_skill_coverage == 0.0
+                        and mandatory_group_coverage == 0.0
+                    ):
+                        continue
 
                 experience_matcher = ExperienceMatcher()
 
@@ -145,7 +149,6 @@ async def _match() -> None:
                     mandatory_skill_groups_coverage=mandatory_group_coverage,
                     preferred_skills_coverage=preferred_skills_coverage,
                     preferred_skill_groups_coverage=preferred_skill_groups_coverage,
-                    low_experience=experience_matcher.low_experience,
                     high_experience=experience_matcher.high_experience,
                 )
 
@@ -156,7 +159,6 @@ async def _match() -> None:
                         'mandatory_skill_groups_coverage': stmt.excluded.mandatory_skill_groups_coverage,
                         'preferred_skills_coverage': stmt.excluded.preferred_skills_coverage,
                         'preferred_skill_groups_coverage': stmt.excluded.preferred_skill_groups_coverage,
-                        'low_experience': stmt.excluded.low_experience,
                         'high_experience': stmt.excluded.high_experience,
                     },
                 )
