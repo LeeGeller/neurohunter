@@ -66,6 +66,10 @@ class SkillsMatcher:
         self.coverage: float = 0.0
         self.group_coverage: float = 0.0
 
+        # Prepared data for matching.
+        self._vacancy_skill_groups: list[SkillGroup] = []
+        self._confirmed_resume_skills: set[str] = set()
+
         # Indices of individual requirements not represented
         # by logical groups.
         self._standalone_skill_indices: list[int] = []
@@ -270,61 +274,54 @@ class SkillsMatcher:
         vacancy_skill_groups: Optional[list[SkillGroup]] = None,
         resume_skill_groups: Optional[list[SkillGroup]] = None,
     ) -> None:
-        """Build individual skill and logical group matrices.
+        """Build individual skill and logical group matrices."""
 
-        Individual skill matrix:
-            Rows represent mandatory vacancy skills.
-            Columns represent individually confirmed resume skills.
-
-            1 - exact canonical name match.
-            0 - no match.
-
-        Group matrix:
-            Rows represent mandatory vacancy groups.
-            Columns represent resume groups.
-
-            1 - resume group satisfies vacancy group.
-            0 - otherwise.
-
-        Group coverage additionally considers individually confirmed
-        resume skills, even when the resume has no corresponding group.
-        """
-
-        mandatory_skill_groups = vacancy_skill_groups or []
+        vacancy_skill_groups = vacancy_skill_groups or []
         resume_skill_groups = resume_skill_groups or []
 
-        mandatory_names = [
+        # Reset previous matching state.
+        self.matrix = []
+        self.group_matrix = []
+        self.skill_matches = []
+        self.group_matches = []
+        self.coverage = 0.0
+        self.group_coverage = 0.0
+        self._standalone_skill_indices = []
+
+        vacancy_names = [
             self.normalize_skill_name(skill['canonical_name'])
             for skill in vacancy_skills
         ]
 
-        confirmed_resume_names = sorted(
-            self._get_confirmed_resume_skills(
-                resume_skills,
-                resume_skill_groups,
-            )
+        self._vacancy_skill_groups = vacancy_skill_groups
+
+        self._confirmed_resume_skills = self._get_confirmed_resume_skills(
+            resume_skills,
+            resume_skill_groups,
         )
 
-        mandatory_grouped_names = self._get_grouped_skill_names(
-            mandatory_skill_groups,
+        confirmed_resume_names = sorted(
+            self._confirmed_resume_skills,
+        )
+
+        vacancy_grouped_names = self._get_grouped_skill_names(
+            vacancy_skill_groups,
         )
 
         # Identify standalone vacancy requirements.
-        # Skills represented in logical groups are evaluated
-        # through group coverage rather than counted twice.
         self._standalone_skill_indices = [
             index
-            for index, skill_name in enumerate(mandatory_names)
-            if skill_name not in mandatory_grouped_names
+            for index, skill_name in enumerate(vacancy_names)
+            if skill_name not in vacancy_grouped_names
         ]
 
         # Build individual skill matrix.
         self.matrix = [
             [
-                int(mandatory == resume)
+                int(vacancy == resume)
                 for resume in confirmed_resume_names
             ]
-            for mandatory in mandatory_names
+            for vacancy in vacancy_names
         ]
 
         # Build logical group matrix.
@@ -332,13 +329,13 @@ class SkillsMatcher:
             [
                 int(
                     self._group_matches_group(
-                        mandatory_group,
+                        vacancy_group,
                         resume_group,
                     )
                 )
                 for resume_group in resume_skill_groups
             ]
-            for mandatory_group in mandatory_skill_groups
+            for vacancy_group in vacancy_skill_groups
         ]
 
     def calculate_skill_matches(self) -> None:
@@ -349,38 +346,52 @@ class SkillsMatcher:
             for row in self.matrix
         ]
 
-    def calculate_group_matches(
-        self,
-        mandatory_skill_groups: list[SkillGroup],
-        resume_skills: list[Skill],
-        resume_skill_groups: list[SkillGroup],
-    ) -> None:
-        """Calculate binary matches for logical vacancy groups.
+    def calculate_group_matches(self) -> None:
+        """Calculate binary matches for logical vacancy groups."""
 
-        A group is considered covered according to its operator:
+        self.group_matches = []
 
-            AND - all options must be confirmed.
-            OR  - at least one option must be confirmed.
-
-        Resume OR groups are treated as alternatives, not as proof
-        of possession of every individual option.
-        """
-
-        confirmed_resume_skills = self._get_confirmed_resume_skills(
-            resume_skills,
-            resume_skill_groups,
-        )
-
-        self.group_matches = [
-            int(
-                self._group_is_covered(
-                    mandatory_group=mandatory_group,
-                    confirmed_resume_skills=confirmed_resume_skills,
-                    resume_skill_groups=resume_skill_groups,
-                )
+        for index, vacancy_group in enumerate(
+            self._vacancy_skill_groups,
+        ):
+            vacancy_options = self._get_group_options(
+                vacancy_group,
             )
-            for mandatory_group in mandatory_skill_groups
-        ]
+
+            if not vacancy_options:
+                self.group_matches.append(0)
+                continue
+
+            operator = vacancy_group['operator']
+
+            matched_options = (
+                vacancy_options & self._confirmed_resume_skills
+            )
+
+            group_matrix_matches = any(
+                self.group_matrix[index],
+            )
+
+            if operator == 'AND':
+                is_matched = (
+                    vacancy_options.issubset(
+                        self._confirmed_resume_skills,
+                    )
+                    or group_matrix_matches
+                )
+
+            elif operator == 'OR':
+                is_matched = (
+                    bool(matched_options)
+                    or group_matrix_matches
+                )
+
+            else:
+                is_matched = False
+
+            self.group_matches.append(
+                int(is_matched),
+            )
 
     def calculate_coverage(self) -> float:
         """Calculate coverage of standalone mandatory skills.

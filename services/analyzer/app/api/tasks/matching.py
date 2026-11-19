@@ -7,6 +7,9 @@ from celery import (
 from sqlalchemy import (
     select,
 )
+from sqlalchemy.dialects.postgresql import (
+    insert,
+)
 
 from app.database.mongo_client import (
     MongoDBClient,
@@ -18,7 +21,12 @@ from app.matching_service.experience_matcher import (
     ExperienceMatcher,
 )
 from app.matching_service.skills_matcher import (
+    Skill,
+    SkillGroup,
     SkillsMatcher,
+)
+from app.models.professional_fit import (
+    ProfessionalFit,
 )
 from app.models.vacancy import (
     VacancyIdentity,
@@ -34,12 +42,13 @@ from app.services.vacancy_context_service import (
 @shared_task
 def run_match() -> None:
     """Celery task to match vacancies vs users."""
+
     asyncio.run(
         _match(),
     )
 
 
-async def _match():
+async def _match() -> None:
     """Match vacancies vs users."""
 
     # Initialize MongoDBClient
@@ -66,59 +75,57 @@ async def _match():
 
         for vacancy_user in vacancy_users:
 
-            resume_features = await skills_matcher.get_resume_features(
-                user_id=uuid.UUID(vacancy_user.user_id),
-            )
+            async with session.begin():
 
-            vacancy_identity = await session.execute(
-                select(
-                    VacancyIdentity.vacancy_uuid
-                ).where(
-                    VacancyIdentity.external_id == vacancy_user.vacancy_id,
+                resume_features = await skills_matcher.get_resume_features(
+                    user_id=uuid.UUID(vacancy_user.user_id),
                 )
-            )
-            vacancy_id = vacancy_identity.scalar_one_or_none()
 
-            vacancy_requirements = await skills_matcher.get_vacancy_requirements(
-                vacancy_id=vacancy_id,
-            )
+                if not resume_features:
+                    continue
 
-            if resume_features and vacancy_requirements:
+                vacancy_identity = await session.execute(
+                    select(
+                        VacancyIdentity.vacancy_uuid,
+                    ).where(
+                        VacancyIdentity.external_id == vacancy_user.vacancy_id,
+                    )
+                )
 
-                skills_matcher.build_skills_matrix(
+                vacancy_id = vacancy_identity.scalar_one_or_none()
+
+                if vacancy_id is None:
+                    continue
+
+                vacancy_requirements = await skills_matcher.get_vacancy_requirements(
+                    vacancy_id=vacancy_id,
+                )
+
+                if not vacancy_requirements:
+                    continue
+
+                # Get fields for ProfessionalFit
+                mandatory_skill_coverage, mandatory_group_coverage = match_skills(
+                    skills_matcher=skills_matcher,
                     vacancy_skills=vacancy_requirements.mandatory_skills,
                     resume_skills=resume_features.hard_skills,
                     vacancy_skill_groups=vacancy_requirements.mandatory_skill_groups,
                     resume_skill_groups=resume_features.hard_skill_groups,
                 )
 
-                skills_matcher.calculate_skill_matches()
-
-                skills_matcher.calculate_group_matches(
-                    mandatory_skill_groups=vacancy_requirements.mandatory_skill_groups,
-                    resume_skills=resume_features.hard_skills,
-                    resume_skill_groups=resume_features.hard_skill_groups,
-                )
-
-                mandatory_skill_coverage = skills_matcher.calculate_coverage()
-                mandatory_group_coverage = skills_matcher.calculate_group_coverage()
-
-                skills_matcher.build_skills_matrix(
+                preferred_skills_coverage, preferred_skill_groups_coverage = match_skills(
+                    skills_matcher=skills_matcher,
                     vacancy_skills=vacancy_requirements.preferred_skills,
                     resume_skills=resume_features.hard_skills,
                     vacancy_skill_groups=vacancy_requirements.preferred_skill_groups,
                     resume_skill_groups=resume_features.hard_skill_groups,
                 )
 
-                skills_matcher.calculate_skill_matches()
-                skills_matcher.calculate_group_matches(
-                    mandatory_skill_groups=vacancy_requirements.preferred_skill_groups,
-                    resume_skills=resume_features.hard_skills,
-                    resume_skill_groups=resume_features.hard_skill_groups,
-                )
-
-                prefered_skill_coverage = skills_matcher.calculate_coverage()
-                prefered_group_coverage = skills_matcher.calculate_group_coverage()
+                if (
+                    mandatory_skill_coverage == 0.0
+                    and mandatory_group_coverage == 0.0
+                ):
+                    continue
 
                 experience_matcher = ExperienceMatcher()
 
@@ -128,9 +135,55 @@ async def _match():
                     resume_features.experience,
                 )
 
-                print('LOW', experience_matcher.low_experience)
-                print('HIGH', experience_matcher.high_experience)
+                if experience_matcher.low_experience:
+                    continue
+
+                stmt = insert(ProfessionalFit).values(
+                    resume_id=resume_features.user_id,
+                    vacancy_requirements_id=vacancy_requirements.id,
+                    mandatory_skills_coverage=mandatory_skill_coverage,
+                    mandatory_skill_groups_coverage=mandatory_group_coverage,
+                    preferred_skills_coverage=preferred_skills_coverage,
+                    preferred_skill_groups_coverage=preferred_skill_groups_coverage,
+                    low_experience=experience_matcher.low_experience,
+                    high_experience=experience_matcher.high_experience,
+                )
+
+                stmt = stmt.on_conflict_do_update(
+                    constraint='uq_professional_fit_resume_id_vacancy_requirements_id',
+                    set_={
+                        'mandatory_skills_coverage': stmt.excluded.mandatory_skills_coverage,
+                        'mandatory_skill_groups_coverage': stmt.excluded.mandatory_skill_groups_coverage,
+                        'preferred_skills_coverage': stmt.excluded.preferred_skills_coverage,
+                        'preferred_skill_groups_coverage': stmt.excluded.preferred_skill_groups_coverage,
+                        'low_experience': stmt.excluded.low_experience,
+                        'high_experience': stmt.excluded.high_experience,
+                    },
+                )
+
+                await session.execute(stmt)
 
 
+def match_skills(
+    skills_matcher: SkillsMatcher,
+    vacancy_skills: list[Skill],
+    resume_skills: list[Skill],
+    vacancy_skill_groups: list[SkillGroup],
+    resume_skill_groups: list[SkillGroup],
+) -> tuple[float, float]:
+    """Return coverage for individual skills and skill groups."""
 
+    skills_matcher.build_skills_matrix(
+        vacancy_skills=vacancy_skills,
+        resume_skills=resume_skills,
+        vacancy_skill_groups=vacancy_skill_groups,
+        resume_skill_groups=resume_skill_groups,
+    )
 
+    skills_matcher.calculate_skill_matches()
+    skills_matcher.calculate_group_matches()
+
+    return (
+        skills_matcher.calculate_coverage(),
+        skills_matcher.calculate_group_coverage(),
+    )
