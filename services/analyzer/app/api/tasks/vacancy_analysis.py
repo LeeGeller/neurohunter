@@ -148,6 +148,8 @@ async def process_vacancy_features(
     )
     vacancy_features = VacancyFeatures(
         vacancy_id=vacancy_uuid,
+        salary_min=vacancy.salary_from,
+        salary_max=vacancy.salary_to,
         **features_schema.model_dump(),
     )
 

@@ -7,6 +7,7 @@ from datetime import (
 )
 from typing import (
     TYPE_CHECKING,
+    Optional,
     TypedDict,
 )
 
@@ -208,7 +209,14 @@ class UserProfile(Base):
         Float,
         nullable=True,
     )
-
+    preferred_start_time: Mapped[Optional[time]] = mapped_column(
+        Time,
+        nullable=True,
+    )
+    preferred_end_time: Mapped[Optional[time]] = mapped_column(
+        Time,
+        nullable=True,
+    )
     flexible_schedule_needed: Mapped[bool | None] = mapped_column(
         Boolean,
         nullable=True,

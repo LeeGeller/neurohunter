@@ -91,6 +91,15 @@ class VacancyFeatures(Base):
         back_populates='vacancy_features',
     )
 
+    salary_min: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    salary_max: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
     # Work schedule
     work_days_per_week: Mapped[float | None] = mapped_column(Float, nullable=True)
     work_hours_per_day: Mapped[float | None] = mapped_column(Float, nullable=True)
