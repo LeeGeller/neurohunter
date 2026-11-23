@@ -1763,23 +1763,24 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "pypdf"
-version = "6.18.0"
+version = "6.21.4"
 description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pypdf-6.18.0-py3-none-any.whl", hash = "sha256:05b762b77bcb9dcb4a7c91fcf5dded585b25bee7269ab3d3001d7c55fa1b324b"},
-    {file = "pypdf-6.18.0.tar.gz", hash = "sha256:ae58b7d93c22c169ffb02c3b06321c45c4f223b4916536568adb57d789d95d01"},
+    {file = "pypdf-6.21.4-py3-none-any.whl", hash = "sha256:33e4fb41ca352810eb4e9838aa0d82d6888a5f8bf682f43e99cce5faa666255c"},
+    {file = "pypdf-6.21.4.tar.gz", hash = "sha256:c8817e3f888d47a087872ded69812c1ef30cacb871d6e053e0c00bbaf0bc2163"},
 ]
 
 [package.extras]
+brotli = ["brotli (>=1.2.0)"]
 crypto = ["cryptography (>3.0)"]
 cryptodome = ["PyCryptodome"]
 dev = ["flit", "pip-tools", "pre-commit", "pytest-cov", "pytest-socket", "pytest-timeout", "pytest-xdist", "wheel"]
 docs = ["myst_parser", "sphinx", "sphinx_rtd_theme"]
 fonts = ["fonttools"]
-full = ["Pillow (>=8.0.0)", "arabic-reshaper", "cryptography (>3.0)", "fonttools", "python-bidi"]
+full = ["Pillow (>=8.0.0)", "arabic-reshaper", "brotli (>=1.2.0)", "cryptography (>3.0)", "fonttools", "python-bidi"]
 image = ["Pillow (>=8.0.0)"]
 rtl-text = ["arabic-reshaper", "python-bidi"]
 
@@ -2265,4 +2266,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "ffdafc91963b02679585d208d8f30119d865f22ba02a8a83bbc8b7030a568e4d"
+content-hash = "e15ca41773ec6ea044baca5e42390cb7850cc4dbd7b68ee8e5f97e58d422352f"
