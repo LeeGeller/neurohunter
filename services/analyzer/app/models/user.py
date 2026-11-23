@@ -6,6 +6,8 @@ from datetime import (
     time,
 )
 from typing import (
+    TYPE_CHECKING,
+    Optional,
     TypedDict,
 )
 
@@ -39,13 +41,20 @@ from sqlalchemy.orm import (
 from app.database.base import (
     Base,
 )
-from app.models.resume import (
-    ResumeDocument,
-    ResumeFeatures,
-)
+
+if TYPE_CHECKING:
+    from app.models.resume import (
+        ResumeDocument,
+        ResumeFeatures,
+    )
+    from app.models.work_environment_fit import (
+        WorkEnvironmentFit,
+    )
 
 
 class WorkFormatConstraints(TypedDict):
+    """WorkFormatConstraints."""
+
     remote: bool | None
     office: bool | None
     hybrid: bool | None
@@ -160,6 +169,9 @@ class UserProfile(Base):
     user: Mapped['User'] = relationship(
         back_populates='profile',
     )
+    work_environment_fit: Mapped['WorkEnvironmentFit'] = relationship(
+        back_populates='profile',
+    )
 
     age: Mapped[int] = mapped_column(
         Integer,
@@ -197,7 +209,14 @@ class UserProfile(Base):
         Float,
         nullable=True,
     )
-
+    preferred_start_time: Mapped[Optional[time]] = mapped_column(
+        Time,
+        nullable=True,
+    )
+    preferred_end_time: Mapped[Optional[time]] = mapped_column(
+        Time,
+        nullable=True,
+    )
     flexible_schedule_needed: Mapped[bool | None] = mapped_column(
         Boolean,
         nullable=True,

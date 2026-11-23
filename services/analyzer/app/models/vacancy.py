@@ -52,6 +52,9 @@ if TYPE_CHECKING:
     from app.models.professional_fit import (
         ProfessionalFit,
     )
+    from app.models.work_environment_fit import (
+        WorkEnvironmentFit,
+    )
 
 
 class Vacancy(BaseModel):
@@ -82,6 +85,19 @@ class VacancyFeatures(Base):
     vacancy_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
+    )
+
+    work_environment_fit: Mapped['WorkEnvironmentFit'] = relationship(
+        back_populates='vacancy_features',
+    )
+
+    salary_min: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    salary_max: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
     )
 
     # Work schedule

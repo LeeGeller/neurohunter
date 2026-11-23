@@ -36,7 +36,7 @@ class VacancyRepository:
         vacancies = []
 
         cursor = self.collection.find({
-            'vacancy_id': {
+            'id': {
                 '$in': vacancy_ids,
             },
         })
