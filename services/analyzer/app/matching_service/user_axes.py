@@ -2,6 +2,7 @@
 
 from typing import (
     Final,
+    TypedDict,
 )
 
 from app.schemas.user.profile_enums import (
@@ -357,4 +358,23 @@ USER_AXES: Final = {
     'weekend_work': WEEKEND_WORK_AXIS,
     'work_format': WORK_FORMAT_AXIS,
     'management_style': MANAGEMENT_STYLE_AXIS,
+}
+
+
+class NumericalWeights(TypedDict):
+    """Importance weights for numerical parameters."""
+
+    salary: float
+    work_days_per_week: float
+    work_hours_per_day: float
+    start_time: float
+    end_time: float
+
+
+NUMERICAL_WEIGHTS: Final[NumericalWeights] = {
+    'salary': 1.0,
+    'work_days_per_week': 1.0,
+    'work_hours_per_day': 1.0,
+    'start_time': 1.0,
+    'end_time': 1.0,
 }
